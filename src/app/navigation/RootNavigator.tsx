@@ -6,7 +6,9 @@ import { useTheme } from '@/theme';
 import { CameraScreen } from '@/screens/Camera/CameraScreen';
 import { CaptureGuideScreen } from '@/screens/CaptureGuide/CaptureGuideScreen';
 import { ConfirmPhotoScreen } from '@/screens/ConfirmPhoto/ConfirmPhotoScreen';
+import { DiseaseDetailScreen } from '@/screens/DiseaseDetail/DiseaseDetailScreen';
 import { ResultsScreen } from '@/screens/Results/ResultsScreen';
+import { ScanDetailScreen } from '@/screens/ScanDetail/ScanDetailScreen';
 import { HistoryScreen } from '@/screens/History/HistoryScreen';
 import { HomeScreen } from '@/screens/Home/HomeScreen';
 import { LibraryScreen } from '@/screens/Library/LibraryScreen';
@@ -43,9 +45,19 @@ export function RootNavigator() {
       <Stack.Screen name="Results" component={ResultsScreen} options={{ title: 'Diagnosis' }} />
       <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
       <Stack.Screen
+        name="ScanDetail"
+        component={ScanDetailScreen}
+        options={{ title: 'Saved scan' }}
+      />
+      <Stack.Screen
         name="Library"
         component={LibraryScreen}
         options={{ title: 'Disease library' }}
+      />
+      <Stack.Screen
+        name="DiseaseDetail"
+        component={DiseaseDetailScreen}
+        options={{ title: 'Condition' }}
       />
       <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
       {__DEV__ ? (

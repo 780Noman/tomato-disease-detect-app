@@ -1,3 +1,5 @@
+import type { ClassCode } from '@/config/classes';
+
 /**
  * The typed route map. Screens consume it via NativeStackScreenProps.
  * Routes are added here in the phase that makes them reachable — a route
@@ -10,7 +12,9 @@ export type RootStackParamList = {
   ConfirmPhoto: { imageUri: string };
   Results: { imageUri: string };
   History: undefined;
+  ScanDetail: { id: number };
   Library: undefined;
+  DiseaseDetail: { code: ClassCode };
   Settings: undefined;
   /** Registered in dev builds only (RootNavigator guards it). */
   Gallery: undefined;

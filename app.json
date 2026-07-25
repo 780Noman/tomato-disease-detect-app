@@ -42,7 +42,8 @@
           "photosPermission": "Tomato Leaf Doctor reads photos you select so an existing leaf picture can be diagnosed."
         }
       ],
-      "react-native-fast-tflite"
+      "react-native-fast-tflite",
+      "expo-sqlite"
     ]
   }
 }

@@ -1,16 +1,44 @@
-import { EmptyState, Screen } from '@/components';
+import { useNavigation } from '@react-navigation/native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-/**
- * The six-class reference library (symptoms, imagery, guidance) is Phase 8
- * content. The screen states that plainly rather than showing stub entries.
- */
+import { Card, CategoryPill, Screen, Text } from '@/components';
+import { CLASS_INFO, categoryDisplayName } from '@/config/classes';
+import { LIBRARY } from '@/features/library/catalog';
+import { spacing } from '@/theme';
+
+/** Reference library for all six conditions. Fully offline. */
 export function LibraryScreen() {
+  const navigation = useNavigation();
+
   return (
-    <Screen scroll={false} testID="library-screen">
-      <EmptyState
-        title="Disease library is not built yet"
-        message="Reference pages for all six pest and deficiency conditions arrive in Phase 8, and will work fully offline."
-      />
+    <Screen testID="library-screen">
+      <View style={styles.stack}>
+        <Text tone="muted">
+          The six conditions this app distinguishes. Healthy leaves are not among them — the model
+          was trained without a healthy class.
+        </Text>
+        {LIBRARY.map((entry) => (
+          <Pressable
+            key={entry.code}
+            accessibilityRole="button"
+            onPress={() => navigation.navigate('DiseaseDetail', { code: entry.code })}
+            testID={`library-${entry.code}`}
+          >
+            <Card style={styles.card}>
+              <CategoryPill label={categoryDisplayName(CLASS_INFO[entry.code].category)} />
+              <Text variant="label">{entry.displayName}</Text>
+              <Text variant="caption" tone="muted">
+                {entry.whatItIs}
+              </Text>
+            </Card>
+          </Pressable>
+        ))}
+      </View>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  stack: { gap: spacing.md },
+  card: { gap: spacing.xs },
+});
