@@ -111,7 +111,7 @@ The app must therefore **guide the capture, not just accept it**:
 
 - The camera screen shows a framing overlay and a worked reference example
 - Explicit, short instructions: detach one leaf → place on a dark surface → shoot from directly above → fill the frame
-- A "why does this matter?" affordance explaining the constraint in one sentence
+- ~~A "why does this matter?" affordance explaining the constraint in one sentence~~ — **removed by owner decision, 2026-07-25.** The toggle and the explanatory card were both taken off the capture guide at the owner's explicit, repeated request. Do not reintroduce either. The four numbered protocol steps remain and still tell the user exactly how to stage the leaf; what is no longer shown is the explanation of _why_ an out-of-distribution photo yields a meaningless answer.
 - After capture, a confirm step where the user can retake
 
 Do not treat this as decoration. Without it the app produces confident nonsense in the field.

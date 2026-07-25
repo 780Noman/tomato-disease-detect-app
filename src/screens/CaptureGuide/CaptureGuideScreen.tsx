@@ -58,21 +58,6 @@ export function CaptureGuideScreen() {
           ))}
         </Card>
 
-        {/*
-          Always visible rather than behind a toggle. CLAUDE.md §5 requires the
-          user to be told WHY the staging matters; a photo of a leaf still on
-          the plant returns a confident, meaningless answer, so this must not
-          be something the user has to go looking for.
-        */}
-        <Card>
-          <Text variant="label">Why this matters</Text>
-          <Text tone="muted">
-            The model learned only from photos staged exactly like this — one detached leaf on a
-            dark background. A photo of a leaf still on the plant will produce a confident-looking
-            answer that means nothing.
-          </Text>
-        </Card>
-
         <Button
           label="Open camera"
           onPress={() => navigation.navigate('Camera')}
