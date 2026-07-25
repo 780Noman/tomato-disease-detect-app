@@ -1,0 +1,21 @@
+# Pinned exact versions. Install ONLY inside server/.venv — never globally.
+#   python -m venv .venv
+#   .venv\Scripts\activate     (Windows)
+#   pip install -r requirements.txt
+fastapi==0.121.2
+uvicorn==0.34.3
+python-multipart==0.0.20
+pillow==11.3.0
+numpy==2.2.6
+pydantic==2.12.4
+
+# Test-only
+pytest==8.4.2
+httpx==0.28.1
+
+# The model runtime is deliberately NOT pinned here.
+# This server runs in a degraded mode without it and never fabricates a
+# prediction. Install ONE of these in the venv when you actually want the
+# debug inference path, matching whichever artefact you have:
+#   pip install tensorflow==2.20.0     # loads .keras or .tflite
+#   pip install tflite-runtime         # lighter, .tflite only (Linux)
