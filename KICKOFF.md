@@ -244,16 +244,21 @@ The model has arrived. It is in `docs/model/`.
 ## PART 4 — FOLLOW-UP PROMPTS
 
 **After Phase 0:**
+
 > Plan approved. Begin Phase 1. Commit when green.
 
 **Between phases:**
+
 > Phase N approved and merged. Begin Phase N+1. Re-read CLAUDE.md §7, §8 and §9 first.
 
 **On an error:**
+
 > There is an error: [paste]. Do not guess a fix. Find the root cause — read the source, check the actual API, reproduce it. Tell me the cause before the fix.
 
 **If it drifts into placeholders:**
+
 > Stop. CLAUDE.md §1: no placeholder code, no fake data, no TODO stubs, no placeholder assets. If something is missing, say what is missing and stop.
 
 **If it starts adding accuracy claims:**
+
 > Remove that. CLAUDE.md §7: no accuracy claim appears anywhere in this app. We do not have a trustworthy number.

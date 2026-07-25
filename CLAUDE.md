@@ -28,14 +28,14 @@ The user photographs a single detached tomato leaf against a dark background. Th
 
 ### The taxonomy is two-level. This matters for the UI.
 
-| Category | Class code | Full name |
-|---|---|---|
-| **Insect Pest** | `tomato__LM` | Leaf Miner |
-| | `tomato__MIT` | Mite |
-| | `tomato__JAS_MIT` | Jassid + Mite (co-infestation) |
-| **Nutrient Deficiency** | `tomato__N` | Nitrogen Deficiency |
-| | `tomato__K` | Potassium Deficiency |
-| | `tomato__N_K` | Nitrogen + Potassium Deficiency |
+| Category                | Class code        | Full name                       |
+| ----------------------- | ----------------- | ------------------------------- |
+| **Insect Pest**         | `tomato__LM`      | Leaf Miner                      |
+|                         | `tomato__MIT`     | Mite                            |
+|                         | `tomato__JAS_MIT` | Jassid + Mite (co-infestation)  |
+| **Nutrient Deficiency** | `tomato__N`       | Nitrogen Deficiency             |
+|                         | `tomato__K`       | Potassium Deficiency            |
+|                         | `tomato__N_K`     | Nitrogen + Potassium Deficiency |
 
 The **category** determines the class of intervention — pesticide versus fertiliser. It is the single most decision-relevant piece of information on the results screen and must be the most prominent element. The specific class comes second.
 
@@ -47,12 +47,12 @@ There is **no healthy class**. The model was trained without one. A healthy leaf
 
 If you have seen the sibling Apple Leaf Doctor project, note the difference clearly:
 
-| | Apple Leaf Doctor | **This project** |
-|---|---|---|
-| Model | YOLOv10 (object detection) | EfficientNetV2-M (image classification) |
-| Output | Bounding boxes + class per box | **One class + probability vector** |
-| Result screen | Boxes overlaid on the image | **No boxes.** Diagnosis card + probability bars |
-| Model size | 15.8 MB → on-device | 438 MB → **server-side for now** |
+|               | Apple Leaf Doctor              | **This project**                                |
+| ------------- | ------------------------------ | ----------------------------------------------- |
+| Model         | YOLOv10 (object detection)     | EfficientNetV2-M (image classification)         |
+| Output        | Bounding boxes + class per box | **One class + probability vector**              |
+| Result screen | Boxes overlaid on the image    | **No boxes.** Diagnosis card + probability bars |
+| Model size    | 15.8 MB → on-device            | 438 MB → **server-side for now**                |
 
 **Do not build a bounding-box overlay.** There are no boxes. The model returns a single softmax vector over six classes. Anything that draws a box is wrong.
 
@@ -64,13 +64,13 @@ If you have seen the sibling Apple Leaf Doctor project, note the difference clea
 
 The model is **not finalised**. A technical review is in `docs/Tomato_Updated_Code_Review.md` — read it, it explains why. Summary of what is pending:
 
-| Item | Status | Effect on the app |
-|---|---|---|
-| Final trained model | Being corrected — current results use a biased selection procedure | No trustworthy model file yet |
-| Class index order | **Unverified** | Wrong order = wrong diagnosis on every scan |
-| Model size | 438 MB (294 MB without optimizer state) | Too large for on-device; server-first for now |
-| TFLite export | Not produced | On-device path blocked until a smaller backbone is trained |
-| Real accuracy | Unknown; the reported figure is inflated | The app must never display an accuracy claim |
+| Item                | Status                                                             | Effect on the app                                          |
+| ------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------- |
+| Final trained model | Being corrected — current results use a biased selection procedure | No trustworthy model file yet                              |
+| Class index order   | **Unverified**                                                     | Wrong order = wrong diagnosis on every scan                |
+| Model size          | 438 MB (294 MB without optimizer state)                            | Too large for on-device; server-first for now              |
+| TFLite export       | Not produced                                                       | On-device path blocked until a smaller backbone is trained |
+| Real accuracy       | Unknown; the reported figure is inflated                           | The app must never display an accuracy claim               |
 
 ### How you handle the class order
 
@@ -118,30 +118,30 @@ Do not treat this as decoration. Without it the app produces confident nonsense 
 
 Do not substitute any of these without asking.
 
-| Layer | Choice | Note |
-|---|---|---|
-| Framework | **Expo (managed) + development build** | Expo *is* React Native. The sibling projects use Expo; stay aligned. |
-| Language | TypeScript, `strict: true` | No `any`. No `@ts-ignore` without a written reason. |
-| Navigation | React Navigation (native-stack) | Typed `RootStackParamList` |
-| State | Zustand | Small, typed stores. No Redux. |
-| Camera | expo-camera | **Decision 2026-07-25** (was react-native-vision-camera): sibling-proven, simpler, sufficient for guided still capture — see `PLAN_REVIEW_AND_MODEL_UPDATE.md` Q1 |
-| Image ops | expo-image-manipulator | **Plain resize to 224×224, no crop** — matches `train_tomato_corrected.py` exactly (`load_img(target_size=...)` is an aspect-distorting resize); the earlier "centre-crop" line was wrong — see review Q2 |
-| Backend | **FastAPI (Python)** in `server/` | Hosts the classification model |
-| HTTP | Axios, single typed client | |
-| Local DB | expo-sqlite | Scan history, offline |
-| Auth | Firebase Auth | Email + anonymous |
-| PDF export | expo-print + expo-sharing | |
-| On-device ML | react-native-fast-tflite | **Primary provider since 2026-07-25** — a 141 MB `.tflite` exists and its I/O contract is inspected; enabled for real inference only once the class order is verified |
-| Lint / format | ESLint + Prettier | |
-| Hooks | Husky + lint-staged | Pre-commit: typecheck + lint |
-| Tests | Jest + React Native Testing Library | |
-| CI | GitHub Actions | typecheck, lint, test on every PR |
+| Layer         | Choice                                 | Note                                                                                                                                                                                                      |
+| ------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework     | **Expo (managed) + development build** | Expo _is_ React Native. The sibling projects use Expo; stay aligned.                                                                                                                                      |
+| Language      | TypeScript, `strict: true`             | No `any`. No `@ts-ignore` without a written reason.                                                                                                                                                       |
+| Navigation    | React Navigation (native-stack)        | Typed `RootStackParamList`                                                                                                                                                                                |
+| State         | Zustand                                | Small, typed stores. No Redux.                                                                                                                                                                            |
+| Camera        | expo-camera                            | **Decision 2026-07-25** (was react-native-vision-camera): sibling-proven, simpler, sufficient for guided still capture — see `PLAN_REVIEW_AND_MODEL_UPDATE.md` Q1                                         |
+| Image ops     | expo-image-manipulator                 | **Plain resize to 224×224, no crop** — matches `train_tomato_corrected.py` exactly (`load_img(target_size=...)` is an aspect-distorting resize); the earlier "centre-crop" line was wrong — see review Q2 |
+| Backend       | **FastAPI (Python)** in `server/`      | Hosts the classification model                                                                                                                                                                            |
+| HTTP          | Axios, single typed client             |                                                                                                                                                                                                           |
+| Local DB      | expo-sqlite                            | Scan history, offline                                                                                                                                                                                     |
+| Auth          | Firebase Auth                          | Email + anonymous                                                                                                                                                                                         |
+| PDF export    | expo-print + expo-sharing              |                                                                                                                                                                                                           |
+| On-device ML  | react-native-fast-tflite               | **Primary provider since 2026-07-25** — a 141 MB `.tflite` exists and its I/O contract is inspected; enabled for real inference only once the class order is verified                                     |
+| Lint / format | ESLint + Prettier                      |                                                                                                                                                                                                           |
+| Hooks         | Husky + lint-staged                    | Pre-commit: typecheck + lint                                                                                                                                                                              |
+| Tests         | Jest + React Native Testing Library    |                                                                                                                                                                                                           |
+| CI            | GitHub Actions                         | typecheck, lint, test on every PR                                                                                                                                                                         |
 
 ### On the missing Android toolchain
 
 This machine has Node and git but **no JDK, no Android SDK, no emulator**. Do **not** attempt to install Android Studio or a JDK. Device builds go through **EAS Build** (cloud). Configure `eas.json` with a development profile, but do not trigger a build until asked.
 
-Everything verifiable locally — `typecheck`, `lint`, `test`, and the preprocessing/decode logic under Node — must be green at every phase. The device check is *deferred*, not skipped. Note it as pending; never fake it.
+Everything verifiable locally — `typecheck`, `lint`, `test`, and the preprocessing/decode logic under Node — must be green at every phase. The device check is _deferred_, not skipped. Note it as pending; never fake it.
 
 ---
 
@@ -153,7 +153,7 @@ The research pipeline this app sits on top of produced an inflated accuracy figu
 
 **Show the top three predictions, not just the winner.** The classes are visually similar — Nitrogen, Potassium and combined N+K deficiency in particular. A single confident-looking label hides genuine ambiguity. Show a ranked probability list.
 
-**Low confidence is a first-class result.** Below a configurable threshold (start at 0.60, keep it in config), the primary result is *"Uncertain — this leaf could not be classified reliably. Consult an agricultural extension officer."* The top-3 list is still shown, clearly framed as possibilities rather than a diagnosis.
+**Low confidence is a first-class result.** Below a configurable threshold (start at 0.60, keep it in config), the primary result is _"Uncertain — this leaf could not be classified reliably. Consult an agricultural extension officer."_ The top-3 list is still shown, clearly framed as possibilities rather than a diagnosis.
 
 **Never fabricate a prediction.** No random fallbacks, no defaulting to the most common class, no filling in a result when inference fails. If the model returns nothing usable, the app says so.
 
@@ -226,14 +226,14 @@ The previous project shipped without a logo. That will not happen here.
 
 You will **design and produce** the following. No placeholders, no stock icons, no empty files:
 
-| Asset | Size | Purpose |
-|---|---|---|
-| `assets/icon.png` | 1024×1024 | App icon (iOS + fallback) |
-| `assets/adaptive-icon.png` | 1024×1024 | Android adaptive foreground — keep artwork inside the centre 66% safe zone |
-| `assets/splash.png` | 1284×2778 | Splash screen |
-| `assets/favicon.png` | 48×48 | Web |
-| `assets/logo.svg` | vector | In-app header and reports |
-| `assets/capture-reference.png` | — | The worked example shown on the camera screen (§5) |
+| Asset                          | Size      | Purpose                                                                    |
+| ------------------------------ | --------- | -------------------------------------------------------------------------- |
+| `assets/icon.png`              | 1024×1024 | App icon (iOS + fallback)                                                  |
+| `assets/adaptive-icon.png`     | 1024×1024 | Android adaptive foreground — keep artwork inside the centre 66% safe zone |
+| `assets/splash.png`            | 1284×2778 | Splash screen                                                              |
+| `assets/favicon.png`           | 48×48     | Web                                                                        |
+| `assets/logo.svg`              | vector    | In-app header and reports                                                  |
+| `assets/capture-reference.png` | —         | The worked example shown on the camera screen (§5)                         |
 
 Author the mark as **SVG first**, then export the raster sizes from it. It must read clearly at 48px. Reference it in `app.json` and verify every path resolves — a broken asset path is exactly how the last app shipped without a logo.
 
@@ -245,10 +245,10 @@ Author the mark as **SVG first**, then export the raster sizes from it. It must 
 
 Three related apps now exist. They should look like the same team built them, and like **three different products**.
 
-| App | Palette | Do not reuse |
-|---|---|---|
-| Eye Care | Medical blue / teal | — |
-| Apple Leaf Doctor | Fresh agricultural green | — |
+| App                    | Palette                                         | Do not reuse                                            |
+| ---------------------- | ----------------------------------------------- | ------------------------------------------------------- |
+| Eye Care               | Medical blue / teal                             | —                                                       |
+| Apple Leaf Doctor      | Fresh agricultural green                        | —                                                       |
 | **Tomato Leaf Doctor** | **Warm terracotta / clay + sage, on warm sand** | **Do not use green as primary. That is the apple app.** |
 
 Starting palette — refine it, but stay in this family:
@@ -286,7 +286,7 @@ Keep the structural discipline of the sibling apps: clean surfaces, hairline bor
 Two sibling projects exist in `C:/Projects/`:
 
 - **Eye Care** (`Eye_Care-Eye_Disease_Prediction_App/eye-care-app/mobile`) — Expo app. Useful: typed nav-param convention, axios typed-client pattern, loading/error/retry UI pattern, `strict: true` tsconfig. It has **no** theme system, component library, state library, lint config, tests or CI — those are greenfield here.
-- **Apple Leaf Doctor** (`apple-leaf-doctor/`) — the closest structural sibling. Reuse its inference-abstraction shape, folder layout, tooling setup, error-handling approach, and design-system *structure*.
+- **Apple Leaf Doctor** (`apple-leaf-doctor/`) — the closest structural sibling. Reuse its inference-abstraction shape, folder layout, tooling setup, error-handling approach, and design-system _structure_.
 
 **Reuse: structure, patterns, tooling. Do not reuse: the palette, the bounding-box UI, or anything detection-specific.**
 

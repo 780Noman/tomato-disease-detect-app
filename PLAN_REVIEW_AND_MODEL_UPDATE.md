@@ -24,12 +24,12 @@ Your plan assumed no deployable model and a server-first path with `TFLiteProvid
 
 A **141 MB `.tflite`** model has arrived. This changes the primary architecture:
 
-| Your plan assumed | Now true |
-|---|---|
-| Model pending; ~294 MB `.keras` if it came | 141 MB `.tflite`, ready |
-| Primary path: `RemoteProvider` (FastAPI) | **Primary path: `TFLiteProvider` (on-device)** |
-| Offline scanning: not possible | **Offline scanning: the whole point, now achievable** |
-| FastAPI server: required | **FastAPI server: now optional / dev-and-debug only** |
+| Your plan assumed                          | Now true                                              |
+| ------------------------------------------ | ----------------------------------------------------- |
+| Model pending; ~294 MB `.keras` if it came | 141 MB `.tflite`, ready                               |
+| Primary path: `RemoteProvider` (FastAPI)   | **Primary path: `TFLiteProvider` (on-device)**        |
+| Offline scanning: not possible             | **Offline scanning: the whole point, now achievable** |
+| FastAPI server: required                   | **FastAPI server: now optional / dev-and-debug only** |
 
 141 MB is large for an app but shippable, and on-device inference means farmers can scan with no connectivity — which was the actual requirement. **The on-device path becomes primary. The remote path stays as a debugging fallback.**
 
@@ -38,6 +38,7 @@ A **141 MB `.tflite`** model has arrived. This changes the primary architecture:
 A `.tflite` file is a black box. If the input shape, normalisation, output shape, or class order is assumed wrong, the app shows a confident **wrong** diagnosis on every scan and never errors. Before writing a line of `TFLiteProvider` inference code, the model must be inspected.
 
 An inspection script is provided: `inspect_tflite.py`. It reads directly from the file:
+
 - input shape + dtype + quantisation params
 - output shape + dtype + whether softmax is inside the graph or must be applied in-app
 - a sanity inference (does it run, does it sum to 1)
