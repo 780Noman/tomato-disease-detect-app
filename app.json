@@ -28,6 +28,21 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Tomato Leaf Doctor uses the camera to photograph a single detached tomato leaf for diagnosis."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Tomato Leaf Doctor reads photos you select so an existing leaf picture can be diagnosed."
+        }
+      ],
+      "react-native-fast-tflite"
+    ]
   }
 }

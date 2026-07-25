@@ -5,6 +5,7 @@ export { CategoryPill } from './CategoryPill';
 export { ConfidenceBar } from './ConfidenceBar';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
+export { FramingOverlay } from './FramingOverlay';
 export { LoadingState } from './LoadingState';
 export { Logo } from './Logo';
 export { Screen } from './Screen';

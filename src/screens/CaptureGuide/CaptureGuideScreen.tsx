@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
@@ -15,6 +16,23 @@ const STEPS = [
 export function CaptureGuideScreen() {
   const navigation = useNavigation();
   const [showWhy, setShowWhy] = useState(false);
+  const [pickerError, setPickerError] = useState<string | null>(null);
+
+  async function pickFromGallery(): Promise<void> {
+    setPickerError(null);
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        quality: 1,
+      });
+      const asset = result.assets?.[0];
+      if (!result.canceled && asset !== undefined) {
+        navigation.navigate('ConfirmPhoto', { imageUri: asset.uri });
+      }
+    } catch {
+      setPickerError('The photo library could not be opened. Check the photos permission.');
+    }
+  }
 
   return (
     <Screen testID="capture-guide-screen">
@@ -63,6 +81,17 @@ export function CaptureGuideScreen() {
           onPress={() => navigation.navigate('Camera')}
           testID="go-camera"
         />
+        <Button
+          label="Choose an existing photo"
+          variant="secondary"
+          onPress={() => void pickFromGallery()}
+          testID="pick-gallery"
+        />
+        {pickerError !== null ? (
+          <Text tone="danger" style={styles.center} testID="picker-error">
+            {pickerError}
+          </Text>
+        ) : null}
       </View>
     </Screen>
   );

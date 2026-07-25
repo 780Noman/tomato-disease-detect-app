@@ -9,13 +9,13 @@ describe('App', () => {
     expect(screen.getByTestId('go-capture-guide')).toBeTruthy();
   });
 
-  it('navigates Home → capture guide → camera pending screen', async () => {
+  it('navigates Home → capture guide → camera screen', async () => {
     await render(<App />);
     fireEvent.press(screen.getByTestId('go-capture-guide'));
     expect(await screen.findByText('How to photograph the leaf')).toBeTruthy();
 
     fireEvent.press(screen.getByTestId('go-camera'));
-    expect(await screen.findByText('Camera capture is not built yet')).toBeTruthy();
+    expect(await screen.findByTestId('camera-screen')).toBeTruthy();
   });
 
   it('reaches settings and switches the theme preference', async () => {

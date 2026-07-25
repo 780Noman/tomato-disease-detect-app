@@ -5,6 +5,8 @@ import { ComponentGallery } from '@/dev/ComponentGallery';
 import { useTheme } from '@/theme';
 import { CameraScreen } from '@/screens/Camera/CameraScreen';
 import { CaptureGuideScreen } from '@/screens/CaptureGuide/CaptureGuideScreen';
+import { ConfirmPhotoScreen } from '@/screens/ConfirmPhoto/ConfirmPhotoScreen';
+import { ResultsScreen } from '@/screens/Results/ResultsScreen';
 import { HistoryScreen } from '@/screens/History/HistoryScreen';
 import { HomeScreen } from '@/screens/Home/HomeScreen';
 import { LibraryScreen } from '@/screens/Library/LibraryScreen';
@@ -33,6 +35,12 @@ export function RootNavigator() {
         options={{ title: 'Capture guide' }}
       />
       <Stack.Screen name="Camera" component={CameraScreen} options={{ title: 'Camera' }} />
+      <Stack.Screen
+        name="ConfirmPhoto"
+        component={ConfirmPhotoScreen}
+        options={{ title: 'Check the photo' }}
+      />
+      <Stack.Screen name="Results" component={ResultsScreen} options={{ title: 'Diagnosis' }} />
       <Stack.Screen name="History" component={HistoryScreen} options={{ title: 'History' }} />
       <Stack.Screen
         name="Library"

@@ -6,8 +6,9 @@
 export type RootStackParamList = {
   Home: undefined;
   CaptureGuide: undefined;
-  /** Capture flow lands in Phase 6; until then the screen states that plainly. */
   Camera: undefined;
+  ConfirmPhoto: { imageUri: string };
+  Results: { imageUri: string };
   History: undefined;
   Library: undefined;
   Settings: undefined;
