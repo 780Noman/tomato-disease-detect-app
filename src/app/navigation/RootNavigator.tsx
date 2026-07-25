@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from './types';
 import { ComponentGallery } from '@/dev/ComponentGallery';
 import { useTheme } from '@/theme';
+import { AuthScreen } from '@/screens/Auth/AuthScreen';
 import { CameraScreen } from '@/screens/Camera/CameraScreen';
 import { CaptureGuideScreen } from '@/screens/CaptureGuide/CaptureGuideScreen';
 import { ConfirmPhotoScreen } from '@/screens/ConfirmPhoto/ConfirmPhotoScreen';
@@ -60,6 +61,7 @@ export function RootNavigator() {
         options={{ title: 'Condition' }}
       />
       <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+      <Stack.Screen name="Auth" component={AuthScreen} options={{ title: 'Account' }} />
       {__DEV__ ? (
         <Stack.Screen
           name="Gallery"

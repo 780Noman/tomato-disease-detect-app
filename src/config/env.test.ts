@@ -1,8 +1,12 @@
 import { EnvError, readEnv } from './env';
 
 describe('readEnv', () => {
-  it('defaults to the mock provider with no remote url', () => {
-    expect(readEnv({})).toEqual({ inferenceProvider: 'mock', remoteApiUrl: null });
+  it('defaults to the mock provider with no remote url and no firebase config', () => {
+    expect(readEnv({})).toEqual({
+      inferenceProvider: 'mock',
+      remoteApiUrl: null,
+      firebase: null,
+    });
   });
 
   it.each(['mock', 'tflite', 'remote'] as const)('accepts provider "%s"', (name) => {

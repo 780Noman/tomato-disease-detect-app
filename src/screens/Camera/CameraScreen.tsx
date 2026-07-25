@@ -4,6 +4,8 @@ import { useRef, useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 
 import { Button, ErrorState, FramingOverlay, LoadingState, Screen, Text } from '@/components';
+import { env } from '@/config/env';
+import { useNetworkStatus } from '@/features/connectivity/useNetworkStatus';
 import { spacing } from '@/theme';
 
 /**
@@ -17,6 +19,9 @@ export function CameraScreen() {
   const cameraRef = useRef<CameraView>(null);
   const [capturing, setCapturing] = useState(false);
   const [captureError, setCaptureError] = useState<string | null>(null);
+  const { online } = useNetworkStatus();
+  // Only the remote path needs the network; on-device inference does not.
+  const needsNetwork = env.inferenceProvider === 'remote' && online === false;
 
   // Permission state not yet known (first render before the hook resolves).
   if (permission === null) {
@@ -100,6 +105,12 @@ export function CameraScreen() {
         </View>
       </View>
       <View style={styles.controls}>
+        {needsNetwork ? (
+          <Text variant="caption" tone="danger" style={styles.center} testID="offline-warning">
+            This build sends photos to a diagnosis server and there is no connection right now. You
+            can still take the photo and retry the diagnosis later.
+          </Text>
+        ) : null}
         <Button
           label={capturing ? 'Capturing…' : 'Take photo'}
           onPress={() => void capture()}

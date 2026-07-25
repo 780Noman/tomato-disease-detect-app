@@ -39,7 +39,9 @@ yarn-error.*
 Thumbs.db
 *.pem
 
-# Python
+# Python — server venv only; never global installs (see GO_AHEAD_pip_and_phases.md)
 __pycache__/
 *.pyc
 .venv/
+server/.venv/
+.pytest_cache/

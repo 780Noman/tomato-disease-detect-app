@@ -16,6 +16,8 @@ export type RootStackParamList = {
   Library: undefined;
   DiseaseDetail: { code: ClassCode };
   Settings: undefined;
+  /** Optional account screen — never a gate on scanning. */
+  Auth: undefined;
   /** Registered in dev builds only (RootNavigator guards it). */
   Gallery: undefined;
 };
