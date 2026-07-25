@@ -17,6 +17,17 @@ coverage/
 *.h5
 server/models/
 
+# Training image datasets never belong in the app repo. The copy that landed
+# here is also the PRE-AUGMENTED balanced set (1,406 files, aug_*.jpg) that
+# docs/Tomato_Updated_Code_Review.md Issue 3 identifies as the wrong dataset
+# to train on. Keeping it out prevents anyone picking it up by accident.
+Balance DataSet Without Healthy Class/
+Balance DataSet Without Healthy Class.zip
+*/tomato__JAS_MIT/
+*/tomato__LM/
+*/tomato__MIT/
+*/tomato__N_K/
+
 # Expo / Metro / native (from the SDK 54 template)
 expo-env.d.ts
 .kotlin/

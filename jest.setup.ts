@@ -13,3 +13,8 @@ jest.mock(
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('react-native-safe-area-context/jest/mock').default,
 );
+
+// The default provider is the on-device model, which needs native modules and
+// a packaged 141 MB model file. Tests select the deterministic mock instead;
+// the real providers are covered by their own unit tests.
+process.env.EXPO_PUBLIC_INFERENCE_PROVIDER ??= 'mock';

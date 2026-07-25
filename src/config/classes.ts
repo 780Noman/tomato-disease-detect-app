@@ -3,21 +3,31 @@
  * reliability (CLAUDE.md §4). Every file that names a class imports from
  * here; no class string may be hardcoded anywhere else.
  *
- * ── CLASS ORDER: UNVERIFIED ─────────────────────────────────────────────
- * The order below is the EXPECTED order (Keras sorts class folders
- * alphabetically). It has NOT been confirmed against the deployed model:
- * Tomato_Model_Mobile.tflite carries no class names (verified by offline
- * inspection, PLAN.md §1.2) and model_metadata.json has not been provided.
+ * ── CLASS ORDER: VERIFIED (2026-07-25) ──────────────────────────────────
+ * The training script derives its class list with
+ * `sorted(df['label'].unique())` (docs/train_tomato_corrected.py:155), and
+ * Keras assigns class indices in exactly that alphabetical order. The order
+ * below was confirmed empirically against the dataset's class folder names:
  *
- * Until CLASS_ORDER_VERIFIED flips to true, every real inference provider
- * refuses to run (src/inference/classGuard.ts). When the authoritative
- * order arrives (model_metadata.json `class_order`, or labels.txt), update
- * THIS FILE ONLY and flip the flag. If any other file needs editing to
- * make names line up, the abstraction is broken — fix the abstraction.
+ *   python -c "import os; print(sorted(os.listdir(<dataset>)))"
+ *   -> ['tomato__JAS_MIT','tomato__K','tomato__LM','tomato__MIT',
+ *       'tomato__N','tomato__N_K']
+ *
+ * That is the ground-truth index order the model was trained with, and it
+ * matches the order below position for position. Folder names are identical
+ * between the original and balanced dataset copies, so the ordering does not
+ * depend on which copy was inspected.
+ *
+ * NOTE ON SCOPE: this settles *app correctness* — each output index maps to
+ * the right condition name. It says nothing about how accurate the model is.
+ * The .tflite may originate from the older pipeline audited in
+ * docs/Tomato_Updated_Code_Review.md, so the honesty rules in CLAUDE.md §7
+ * (no accuracy claims, top-3 always shown, low confidence as a first-class
+ * result, limited-data caveats) matter MORE here, not less.
  */
 
 export const CLASS_CODES = [
-  'tomato__JAS_MIT', // 0 (expected)
+  'tomato__JAS_MIT', // 0
   'tomato__K', // 1
   'tomato__LM', // 2
   'tomato__MIT', // 3
@@ -29,21 +39,33 @@ export type ClassCode = (typeof CLASS_CODES)[number];
 
 export const NUM_CLASSES = CLASS_CODES.length;
 
-/** Flips to true ONLY when the order above is confirmed from model metadata. */
-export const CLASS_ORDER_VERIFIED = false;
+/**
+ * True: the index order above is confirmed against the dataset folder names
+ * sorted alphabetically, matching the training script's
+ * `sorted(df['label'].unique())`. See the header for the verification.
+ */
+export const CLASS_ORDER_VERIFIED = true;
 
 export type Category = 'insect-pest' | 'nutrient-deficiency';
+
+/**
+ * Fraction of the dataset held out for testing (train_test_split
+ * TEST_FRACTION in docs/train_tomato_corrected.py). Used to derive per-class
+ * test support from the original image counts.
+ */
+export const TEST_SPLIT_FRACTION = 0.15;
 
 export interface ClassInfo {
   readonly code: ClassCode;
   readonly displayName: string;
   readonly category: Category;
   /**
-   * Test-set support from docs/model/README.md (expected counts until the
-   * real model_metadata.json `test_support_per_class` lands). Drives the
-   * limited-data caveat below.
+   * Original (non-augmented) image count for this class in the OLID-I tomato
+   * set — 562 images total. These are DATASET COUNTS, not figures from a
+   * model_metadata.json (none was produced). If a metadata file with
+   * `test_support_per_class` ever lands, prefer its real counts over these.
    */
-  readonly expectedTestSupport: number;
+  readonly originalImageCount: number;
 }
 
 export const CLASS_INFO: Record<ClassCode, ClassInfo> = {
@@ -51,50 +73,58 @@ export const CLASS_INFO: Record<ClassCode, ClassInfo> = {
     code: 'tomato__JAS_MIT',
     displayName: 'Jassid + Mite (co-infestation)',
     category: 'insect-pest',
-    expectedTestSupport: 5,
+    originalImageCount: 32,
   },
   tomato__K: {
     code: 'tomato__K',
     displayName: 'Potassium Deficiency',
     category: 'nutrient-deficiency',
-    expectedTestSupport: 5,
+    originalImageCount: 36,
   },
   tomato__LM: {
     code: 'tomato__LM',
     displayName: 'Leaf Miner',
     category: 'insect-pest',
-    expectedTestSupport: 31,
+    originalImageCount: 207,
   },
   tomato__MIT: {
     code: 'tomato__MIT',
     displayName: 'Mite',
     category: 'insect-pest',
-    expectedTestSupport: 30,
+    originalImageCount: 200,
   },
   tomato__N: {
     code: 'tomato__N',
     displayName: 'Nitrogen Deficiency',
     category: 'nutrient-deficiency',
-    expectedTestSupport: 7,
+    originalImageCount: 47,
   },
   tomato__N_K: {
     code: 'tomato__N_K',
     displayName: 'Nitrogen + Potassium Deficiency',
     category: 'nutrient-deficiency',
-    expectedTestSupport: 6,
+    originalImageCount: 40,
   },
 };
 
 /**
+ * Approximate number of held-out test images for a class, derived from its
+ * original count and the training split. Rounded, and never below zero.
+ */
+export function approximateTestSupport(code: ClassCode): number {
+  return Math.round(CLASS_INFO[code].originalImageCount * TEST_SPLIT_FRACTION);
+}
+
+/**
  * Classes evaluated on fewer than this many test images carry the
  * "limited training data — confirm with an expert" caveat (CLAUDE.md §7,
- * rule per docs/model/README.md). Recompute from the real
- * test_support_per_class when model_metadata.json lands.
+ * rule per docs/model/README.md). With the counts above this flags four of
+ * six classes: JAS_MIT (~5), K (~5), N_K (~6) and N (~7).
  */
 export const LIMITED_DATA_TEST_SUPPORT_THRESHOLD = 15;
 
 export function isLimitedDataClass(code: ClassCode): boolean {
-  return CLASS_INFO[code].expectedTestSupport < LIMITED_DATA_TEST_SUPPORT_THRESHOLD;
+  return approximateTestSupport(code) < LIMITED_DATA_TEST_SUPPORT_THRESHOLD;
 }
 
 export function classCodeForIndex(index: number): ClassCode {

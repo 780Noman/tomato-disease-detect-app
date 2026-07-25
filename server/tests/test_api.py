@@ -25,16 +25,41 @@ def leaf_photo() -> bytes:
 
 
 def test_health_reports_degraded_without_a_model() -> None:
+    # The class order is verified, but no model file is present, so the server
+    # is still degraded - and says so rather than serving predictions.
     response = client.get("/health")
     assert response.status_code == 200
     body = response.json()
     assert body["model_loaded"] is False
     assert body["status"] == "degraded"
-    assert body["class_order_verified"] is False
+    assert body["class_order_verified"] is True
     assert len(body["class_order"]) == N_CLASSES
 
 
-def test_predict_refuses_while_the_class_order_is_unverified() -> None:
+def test_health_reports_the_verified_alphabetical_order() -> None:
+    order = client.get("/health").json()["class_order"]
+    assert order == sorted(order), "index order must be the alphabetical order Keras assigned"
+    assert order == [
+        "tomato__JAS_MIT",
+        "tomato__K",
+        "tomato__LM",
+        "tomato__MIT",
+        "tomato__N",
+        "tomato__N_K",
+    ]
+
+
+def test_predict_refuses_without_a_model_even_though_the_order_is_verified() -> None:
+    response = client.post("/predict", files={"image": ("leaf.jpg", leaf_photo(), "image/jpeg")})
+    assert response.status_code == 503
+    assert response.json()["code"] == "model-not-loaded"
+
+
+def test_predict_still_refuses_if_the_order_is_ever_unverified(monkeypatch) -> None:
+    # The guard must remain live, not become dead code now that the flag is set.
+    monkeypatch.setattr(main.service, "class_order_verified", False)
+    monkeypatch.setattr(main.service, "predictor", lambda batch: np.zeros(N_CLASSES, np.float32))
+
     response = client.post("/predict", files={"image": ("leaf.jpg", leaf_photo(), "image/jpeg")})
     assert response.status_code == 503
     assert response.json()["code"] == "class-order-unverified"
@@ -46,17 +71,7 @@ def test_predict_rejects_an_empty_upload() -> None:
     assert response.json()["code"] == "image-unreadable"
 
 
-def test_predict_refuses_when_verified_but_no_model_is_loaded(monkeypatch) -> None:
-    monkeypatch.setattr(main.service, "class_order_verified", True)
-    monkeypatch.setattr(main.service, "predictor", None)
-
-    response = client.post("/predict", files={"image": ("leaf.jpg", leaf_photo(), "image/jpeg")})
-    assert response.status_code == 503
-    assert response.json()["code"] == "model-not-loaded"
-
-
 def test_predict_rejects_a_non_image_upload(monkeypatch) -> None:
-    monkeypatch.setattr(main.service, "class_order_verified", True)
     monkeypatch.setattr(main.service, "predictor", lambda batch: np.zeros(N_CLASSES, np.float32))
 
     response = client.post("/predict", files={"image": ("x.jpg", b"not an image", "image/jpeg")})

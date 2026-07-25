@@ -2,10 +2,13 @@
 
 **Status: ALL PHASES BUILT AND MERGED TO `main`.** Phases 1–9 complete: scaffold+tooling, brand+design system, navigation shell, inference layer, capture flow, honest results, offline history/library/PDF, optional accounts + offline hardening, and the venv-isolated FastAPI debug server. 228 app tests + 14 server tests green; typecheck 0 errors, lint 0 warnings.
 
-**Two items remain open, neither of which code can close:**
+**Class order: RESOLVED 2026-07-25.** Determined by the training script's `sorted(df['label'].unique())` and confirmed empirically against the dataset's class folder names (`python -c "print(sorted(os.listdir(...)))"` → `['tomato__JAS_MIT','tomato__K','tomato__LM','tomato__MIT','tomato__N','tomato__N_K']`). `CLASS_ORDER_VERIFIED` is `true` in `src/config/classes.ts`; per-class reliability now derives from the original OLID-I counts (562 total) and the 15% split, still flagging the four minority classes. The on-device provider is the default. The guard remains live and tested in both directions.
 
-1. **Class order (blocks real inference).** `model_metadata.json` or `labels.txt` has not been supplied. `CLASS_ORDER_VERIFIED` stays `false`; both real providers and the server's `/predict` refuse. When it arrives: update `src/config/classes.ts` only (order + `expectedTestSupport`), flip the flag, and report the verified order.
-2. **Device verification.** Deferred to an EAS development build, which also resolves the live model sanity inference and the `MODEL_SOURCE` packaging decision (bundled asset vs first-run download for 141 MB). Never marked done without evidence.
+**One item remains open:**
+
+- **Device verification via EAS.** Resolves the live model sanity inference _and_ the `MODEL_SOURCE` packaging decision (bundled asset vs first-run download for 141 MB). Until it is packaged, the on-device provider fails loudly rather than pretending. Never marked done without evidence.
+
+**Not an app concern, tracked for clarity:** the model's real-world accuracy is unsettled — the `.tflite` may originate from the pipeline audited in `docs/Tomato_Updated_Code_Review.md`. The app wires and runs correctly regardless; this is precisely why §7's honesty rules stay in force.
 
 Machine policy in force: npm allowed; pip allowed **only** inside `server/.venv` (per `GO_AHEAD_pip_and_phases.md`) — no global installs, and no TensorFlow on the app side.
 

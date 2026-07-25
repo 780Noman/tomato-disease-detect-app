@@ -47,8 +47,16 @@ function isProviderName(value: string): value is InferenceProviderName {
   return (INFERENCE_PROVIDERS as readonly string[]).includes(value);
 }
 
+/**
+ * On-device inference is the primary path, so it is the default when nothing
+ * is configured. Development and tests select `mock` explicitly via .env /
+ * jest.setup.ts — a build that says nothing gets the real provider, not a
+ * simulated one.
+ */
+export const DEFAULT_INFERENCE_PROVIDER: InferenceProviderName = 'tflite';
+
 export function readEnv(source: EnvSource): Env {
-  const provider = source.EXPO_PUBLIC_INFERENCE_PROVIDER ?? 'mock';
+  const provider = source.EXPO_PUBLIC_INFERENCE_PROVIDER ?? DEFAULT_INFERENCE_PROVIDER;
   if (!isProviderName(provider)) {
     throw new EnvError(
       `EXPO_PUBLIC_INFERENCE_PROVIDER must be one of ${INFERENCE_PROVIDERS.join(', ')}; got "${provider}".`,

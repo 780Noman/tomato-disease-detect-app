@@ -1,12 +1,16 @@
 import { EnvError, readEnv } from './env';
 
 describe('readEnv', () => {
-  it('defaults to the mock provider with no remote url and no firebase config', () => {
+  it('defaults to the on-device provider — an unconfigured build gets the real model, not a mock', () => {
     expect(readEnv({})).toEqual({
-      inferenceProvider: 'mock',
+      inferenceProvider: 'tflite',
       remoteApiUrl: null,
       firebase: null,
     });
+  });
+
+  it('lets an explicit mock selection override the default (dev and tests)', () => {
+    expect(readEnv({ EXPO_PUBLIC_INFERENCE_PROVIDER: 'mock' }).inferenceProvider).toBe('mock');
   });
 
   it.each(['mock', 'tflite', 'remote'] as const)('accepts provider "%s"', (name) => {

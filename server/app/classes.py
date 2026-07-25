@@ -6,14 +6,13 @@ because the server cannot import TypeScript. Keep the two in step: the
 /health endpoint reports the order it is using so a mismatch is visible
 rather than silent.
 
-CLASS ORDER: UNVERIFIED. The order below is the expected alphabetical order
-that Keras produces from sorted folder names. It has NOT been confirmed
-against the deployed model - Tomato_Model_Mobile.tflite carries no class
-names and no model_metadata.json has been supplied.
+CLASS ORDER: VERIFIED (2026-07-25). The training script derives its class list
+with sorted(df['label'].unique()) and Keras assigns indices in that
+alphabetical order. Confirmed empirically against the dataset's class folder
+names sorted with Python's sorted(), which returns exactly the order below.
 
-While CLASS_ORDER_VERIFIED is False the /predict endpoint refuses to serve
-predictions, exactly like the app's providers. A wrong order means a
-confident wrong diagnosis on every request.
+A model_metadata.json in server/models/ still takes precedence if present -
+it is the authoritative source, and load_class_order() prefers it.
 """
 
 from __future__ import annotations
@@ -30,7 +29,7 @@ EXPECTED_CLASS_ORDER: list[str] = [
     "tomato__N_K",  # 5
 ]
 
-CLASS_ORDER_VERIFIED = False
+CLASS_ORDER_VERIFIED = True
 
 CATEGORY_BY_CLASS: dict[str, str] = {
     "tomato__LM": "insect-pest",

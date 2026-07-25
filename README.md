@@ -9,37 +9,49 @@ Diagnosis runs **on-device**, so scanning works with no connection.
 
 ## Status
 
-| Area                            | State                                                                    |
-| ------------------------------- | ------------------------------------------------------------------------ |
-| App (screens, capture, results) | Built                                                                    |
-| Offline history, library, PDF   | Built                                                                    |
-| Inference abstraction           | Built — mock / on-device TFLite / remote                                 |
-| **Real inference**              | **Disabled — the model's class index order is unverified** (see below)   |
-| Optional accounts (Firebase)    | Built; needs a project's `EXPO_PUBLIC_FIREBASE_*` values                 |
-| FastAPI debug server            | Built (optional; the on-device path is primary) — see `server/README.md` |
-| Device verification             | **Pending** — deferred to an EAS development build                       |
+| Area                            | State                                                                                        |
+| ------------------------------- | -------------------------------------------------------------------------------------------- |
+| App (screens, capture, results) | Built                                                                                        |
+| Offline history, library, PDF   | Built                                                                                        |
+| Inference abstraction           | Built — mock / on-device TFLite / remote                                                     |
+| **Class order**                 | **Verified** — confirmed against sorted dataset folder names                                 |
+| **Real inference**              | Unblocked; on-device is the default provider. Needs the model packaged at the EAS build step |
+| Optional accounts (Firebase)    | Built; needs a project's `EXPO_PUBLIC_FIREBASE_*` values                                     |
+| FastAPI debug server            | Built (optional; the on-device path is primary) — see `server/README.md`                     |
+| Device verification             | **Pending** — deferred to an EAS development build                                           |
 
-### Why real inference is disabled
+### The model and its class order
 
-`Tomato_Model_Mobile.tflite` (141 MB) exists and its input/output contract has been verified by
-inspection (`tools/inspect_tflite_offline.py`):
+`Tomato_Model_Mobile.tflite` (141 MB). Its input/output contract was read from the file itself
+(`tools/inspect_tflite_offline.py`):
 
 ```
 input  [1, 224, 224, 3] float32, raw 0-255 (no normalisation)
 output [1, 6]           float32, softmax inside the graph
 ```
 
-But a `.tflite` file carries **no class names**, and no `model_metadata.json` or `labels.txt` has
-been supplied. Without the authoritative class order, a prediction index cannot be mapped to a
-condition — the app would show a confident, wrong diagnosis on every scan.
+**Class index order — verified.** A `.tflite` carries no class names, but the order is fully
+determined by the training code: `sorted(df['label'].unique())`, and Keras assigns indices in that
+alphabetical order. Confirmed empirically against the dataset's class folder names:
 
-So `CLASS_ORDER_VERIFIED` in `src/config/classes.ts` ships `false` and both real providers refuse
-to load or run. The app runs against `MockProvider` in development.
+```
+0: tomato__JAS_MIT   1: tomato__K   2: tomato__LM
+3: tomato__MIT       4: tomato__N   5: tomato__N_K
+```
 
-**To enable real inference:** put the authoritative order (from `model_metadata.json`'s
-`class_order`, or a `labels.txt` exported with the model) into `src/config/classes.ts`, update
-`expectedTestSupport` from `test_support_per_class`, and flip the flag. That file is the only one
-that changes.
+`CLASS_ORDER_VERIFIED` in `src/config/classes.ts` is `true`, and the on-device provider is the
+default. The guard that blocks real providers on an unverified order is still live and still tested
+in both directions — it has not become dead code.
+
+**What remains:** the model has to be packaged into a build before on-device inference can actually
+run (`MODEL_SOURCE` in `src/inference/modelConfig.ts`, decided at the EAS build step). Until then
+the app fails loudly with "the on-device model is not available on this build" — it never
+substitutes a fake result. Use `EXPO_PUBLIC_INFERENCE_PROVIDER=mock` to work on the UI meanwhile.
+
+**Separately: model accuracy is not settled.** The class order being right means the app names the
+correct condition for each output index. It says nothing about how good the predictions are — the
+`.tflite` may come from the pipeline audited in `docs/Tomato_Updated_Code_Review.md`. That is a
+research-side matter, and it is exactly why the honesty rules below are non-negotiable.
 
 ---
 

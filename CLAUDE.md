@@ -60,7 +60,11 @@ If you have seen the sibling Apple Leaf Doctor project, note the difference clea
 
 ## 4. CURRENT BLOCKERS — READ BEFORE TOUCHING INFERENCE
 
-> **Update 2026-07-25:** `Tomato_Model_Mobile.tflite` (141 MB) has arrived and its I/O contract is recorded in `PLAN.md` §1.2 (inspected via `tools/inspect_tflite_offline.py`). On-device is now the primary path (`PLAN_REVIEW_AND_MODEL_UPDATE.md`). **The class order remains UNVERIFIED** — the file carries no class names; everything below about the class-order guard still applies unchanged.
+> **Update 2026-07-25:** `Tomato_Model_Mobile.tflite` (141 MB) has arrived and its I/O contract is recorded in `PLAN.md` §1.2 (inspected via `tools/inspect_tflite_offline.py`). On-device is the primary path and is now the default provider.
+>
+> **The class order is VERIFIED.** It is determined by the training script's `sorted(df['label'].unique())` and was confirmed against the dataset's class folder names sorted alphabetically: `JAS_MIT, K, LM, MIT, N, N_K`. `CLASS_ORDER_VERIFIED` is `true`. The guard described below is unchanged and still tested in both directions — do not delete it.
+>
+> Still open: packaging the model into a build (`MODEL_SOURCE`), and device verification via EAS. **Model accuracy remains unsettled** and is a research-side concern; §7's honesty rules matter more because of it, not less.
 
 The model is **not finalised**. A technical review is in `docs/Tomato_Updated_Code_Review.md` — read it, it explains why. Summary of what is pending:
 
