@@ -1,0 +1,27 @@
+# Dependencies / build output
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+*.log
+
+# Environment — .env.example is committed, real values never are
+.env
+.env.*
+!.env.example
+
+# Model artefacts — hundreds of MB, never committed (CLAUDE.md §8)
+*.tflite
+*.keras
+*.h5
+server/models/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
