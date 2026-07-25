@@ -163,7 +163,7 @@ The research pipeline this app sits on top of produced an inflated accuracy figu
 
 **Round confidence honestly.** Display bands or one decimal place. `87.3%` implies a precision this model does not have; `87%` or "High confidence" is honest.
 
-**Carry the caveat about rare classes.** Jassid+Mite, Potassium and N+K deficiency were trained on very few real examples. When one of those is the top prediction, the result screen shows a short note that this class has limited training data and the result should be confirmed by an expert. Keep the class-reliability map in config so it can be updated when better numbers exist.
+**~~Carry the caveat about rare classes.~~ — changed by owner decision, 2026-07-25.** The "Limited training data" badge and the "learned from very few real examples" note were removed from the results screen **and** the PDF report at the owner's explicit request. In their place, every diagnosis carries one short line: _"Consult an agricultural extension officer before acting on this result."_ Do not reintroduce the badge or the explanation. The class-reliability map (`isLimitedDataClass`, per-class counts) stays in config and is still used by the disease library, so the data is available if the decision is revisited.
 
 **No healthy class exists.** If a user photographs a healthy leaf, the model will still name a disease. The results screen must carry a persistent, quiet note that the model only distinguishes between the six conditions and does not detect healthy leaves.
 

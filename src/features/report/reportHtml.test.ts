@@ -61,13 +61,20 @@ describe('buildReportHtml — the PDF carries the same honesty rules as the scre
     expect(html).toMatch(/extension officer/i);
   });
 
-  it('adds the limited-data caveat for weakly-supported classes only', () => {
-    const rare = buildReportHtml(
-      scan({ topClass: 'tomato__JAS_MIT', category: 'insect-pest' }),
-      null,
-    );
-    expect(rare).toContain('Limited training data');
-    expect(buildReportHtml(scan(), null)).not.toContain('Limited training data');
+  // Owner decision: the limited-data badge and explanation were removed from
+  // the report too, so it matches the results screen the user saw.
+  it.each([
+    ['a weakly-supported class', 'tomato__JAS_MIT' as const],
+    ['a well-supported class', 'tomato__LM' as const],
+  ])('carries no limited-data wording for %s, only expert advice', (_label, topClass) => {
+    const html = buildReportHtml(scan({ topClass }), null);
+    expect(html).not.toContain('Limited training data');
+    expect(html).not.toContain('learned from very few real examples');
+    expect(html).toContain('Consult an agricultural extension officer before acting');
+  });
+
+  it('still tells the reader to confirm with an extension officer', () => {
+    expect(buildReportHtml(scan(), null)).toMatch(/extension officer/i);
   });
 
   it('always carries the no-healthy-class note', () => {

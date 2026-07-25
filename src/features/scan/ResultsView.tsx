@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import { Badge, Card, CategoryPill, ConfidenceBar, PhotoFrame, Text } from '@/components';
-import { CLASS_INFO, categoryDisplayName, isLimitedDataClass } from '@/config/classes';
+import { CLASS_INFO, categoryDisplayName } from '@/config/classes';
 import {
   confidenceBand,
   confidenceBandLabel,
@@ -57,15 +57,15 @@ export function ResultsView({ imageUri, result }: ResultsViewProps) {
             {confidenceBandLabel(confidenceBand(top.probability))} ·{' '}
             {displayPercent(top.probability)}
           </Text>
-          {isLimitedDataClass(top.classCode) ? (
-            <View style={styles.caveat} testID="limited-data-caveat">
-              <Badge label="Limited training data" tone="warning" />
-              <Text variant="caption" tone="muted">
-                This condition was learned from very few real examples. Have the result confirmed by
-                an expert before acting on it.
-              </Text>
-            </View>
-          ) : null}
+          {/*
+            Owner decision 2026-07-25: the "Limited training data" badge and
+            its explanation were removed. One short line to consult an expert
+            replaces them, and it shows on every diagnosis rather than only on
+            weakly-supported classes.
+          */}
+          <Text variant="caption" tone="muted" testID="expert-advice">
+            Consult an agricultural extension officer before acting on this result.
+          </Text>
         </Card>
       )}
 
@@ -96,6 +96,5 @@ export function ResultsView({ imageUri, result }: ResultsViewProps) {
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
   card: { gap: spacing.sm },
-  caveat: { gap: spacing.xs, marginTop: spacing.xs },
   healthyNote: { textAlign: 'center', paddingHorizontal: spacing.md },
 });

@@ -78,38 +78,29 @@ describe('ResultsView — CLAUDE.md §7 honest UI', () => {
     expect(screen.queryByTestId('diagnosis-result')).toBeNull();
   });
 
-  it('carries the limited-data caveat for weakly-supported classes', async () => {
-    const result = classification(
-      {
-        tomato__JAS_MIT: 0.71,
-        tomato__MIT: 0.12,
-        tomato__LM: 0.08,
-        tomato__K: 0.04,
-        tomato__N: 0.03,
-        tomato__N_K: 0.02,
-      },
-      false,
-    );
+  // The "Limited training data" badge and its explanation were removed by
+  // owner decision; one expert-consult line replaces them on every diagnosis.
+  it.each([
+    ['a weakly-supported class', 'tomato__JAS_MIT'],
+    ['a well-supported class', 'tomato__LM'],
+  ])('shows the expert-consult line for %s, and no limited-data badge', async (_label, code) => {
+    const vector: Record<string, number> = {
+      tomato__JAS_MIT: 0.02,
+      tomato__K: 0.03,
+      tomato__LM: 0.04,
+      tomato__MIT: 0.05,
+      tomato__N: 0.03,
+      tomato__N_K: 0.03,
+    };
+    vector[code] = 0.8;
+    const result = classification(vector, false);
     await renderWithTheme(<ResultsView imageUri={URI} result={result} />);
 
-    expect(screen.getByTestId('limited-data-caveat')).toBeTruthy();
-    expect(screen.getByText(/confirmed\s+by an expert|confirmed by an expert/)).toBeTruthy();
-  });
-
-  it('omits the caveat for well-supported classes', async () => {
-    const result = classification(
-      {
-        tomato__LM: 0.82,
-        tomato__MIT: 0.1,
-        tomato__JAS_MIT: 0.03,
-        tomato__K: 0.02,
-        tomato__N: 0.02,
-        tomato__N_K: 0.01,
-      },
-      false,
-    );
-    await renderWithTheme(<ResultsView imageUri={URI} result={result} />);
+    expect(screen.getByTestId('expert-advice')).toBeTruthy();
+    expect(screen.getByText(/Consult an agricultural extension officer/)).toBeTruthy();
     expect(screen.queryByTestId('limited-data-caveat')).toBeNull();
+    expect(screen.queryByText(/Limited training data/)).toBeNull();
+    expect(screen.queryByText(/learned from very few real examples/)).toBeNull();
   });
 
   it('always shows the no-healthy-class note', async () => {

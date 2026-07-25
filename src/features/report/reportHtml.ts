@@ -1,4 +1,4 @@
-import { CLASS_INFO, categoryDisplayName, isLimitedDataClass } from '@/config/classes';
+import { CLASS_INFO, categoryDisplayName } from '@/config/classes';
 import {
   confidenceBand,
   confidenceBandLabel,
@@ -44,11 +44,13 @@ export function buildReportHtml(scan: SavedScan, imageDataUri: string | null): s
        <h1>${escapeHtml(info.displayName)}</h1>
        <p class="muted">${escapeHtml(confidenceBandLabel(confidenceBand(scan.confidence)))} · ${displayPercent(scan.confidence)}</p>`;
 
-  const caveat =
-    !scan.lowConfidence && isLimitedDataClass(scan.topClass)
-      ? `<p class="tag warn">Limited training data</p>
-         <p class="muted">This condition was learned from very few real examples. Have the result confirmed by an expert before acting on it.</p>`
-      : '';
+  // Owner decision 2026-07-25: the "Limited training data" badge and its
+  // explanation were removed here as well as on the results screen, so the
+  // exported report matches what the user saw. The footer already tells the
+  // reader to confirm the diagnosis with an extension officer before acting.
+  const caveat = scan.lowConfidence
+    ? ''
+    : `<p class="muted">Consult an agricultural extension officer before acting on this result.</p>`;
 
   const unverifiedNote = scan.classOrderVerified
     ? ''
