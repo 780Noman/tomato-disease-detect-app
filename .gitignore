@@ -17,9 +17,27 @@ coverage/
 *.h5
 server/models/
 
+# Expo / Metro / native (from the SDK 54 template)
+expo-env.d.ts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.tsbuildinfo
+/ios
+/android
+
 # OS noise
 .DS_Store
 Thumbs.db
+*.pem
 
 # Python
 __pycache__/

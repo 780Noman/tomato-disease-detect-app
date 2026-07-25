@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Tomato Leaf Doctor",
+    "slug": "tomato-leaf-doctor",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "scheme": "tomatoleafdoctor",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.tomatoleafdoctor.app"
+    },
+    "android": {
+      "package": "com.tomatoleafdoctor.app",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    }
+  }
+}

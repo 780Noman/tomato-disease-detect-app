@@ -1,0 +1,14 @@
+# Normalise line endings to LF in the repository; prettier enforces LF in the
+# working copy too (endOfLine: lf).
+* text=auto eol=lf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ttf binary
+*.otf binary
+*.tflite binary
+*.keras binary
+*.h5 binary
