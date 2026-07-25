@@ -20,6 +20,14 @@ module.exports = [
     },
   },
   {
-    ignores: ['node_modules/**', '.expo/**', 'dist/**', 'web-build/**', 'coverage/**'],
+    ignores: [
+      'node_modules/**',
+      '.expo/**',
+      'dist/**',
+      'web-build/**',
+      'coverage/**',
+      // The server is Python; its venv vendors third-party JS we do not own.
+      'server/**',
+    ],
   },
 ];

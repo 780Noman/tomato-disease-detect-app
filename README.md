@@ -9,15 +9,15 @@ Diagnosis runs **on-device**, so scanning works with no connection.
 
 ## Status
 
-| Area                            | State                                                                  |
-| ------------------------------- | ---------------------------------------------------------------------- |
-| App (screens, capture, results) | Built                                                                  |
-| Offline history, library, PDF   | Built                                                                  |
-| Inference abstraction           | Built — mock / on-device TFLite / remote                               |
-| **Real inference**              | **Disabled — the model's class index order is unverified** (see below) |
-| Optional accounts (Firebase)    | Built; needs a project's `EXPO_PUBLIC_FIREBASE_*` values               |
-| FastAPI debug server            | Not built (optional; the on-device path is primary)                    |
-| Device verification             | **Pending** — deferred to an EAS development build                     |
+| Area                            | State                                                                    |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| App (screens, capture, results) | Built                                                                    |
+| Offline history, library, PDF   | Built                                                                    |
+| Inference abstraction           | Built — mock / on-device TFLite / remote                                 |
+| **Real inference**              | **Disabled — the model's class index order is unverified** (see below)   |
+| Optional accounts (Firebase)    | Built; needs a project's `EXPO_PUBLIC_FIREBASE_*` values                 |
+| FastAPI debug server            | Built (optional; the on-device path is primary) — see `server/README.md` |
+| Device verification             | **Pending** — deferred to an EAS development build                       |
 
 ### Why real inference is disabled
 
@@ -75,7 +75,11 @@ npm run lint        # eslint, zero warnings
 npm test            # jest
 ```
 
-The pre-commit hook runs all three. CI runs them on every push and pull request.
+The pre-commit hook runs all three. CI runs them on every push and pull request, plus the server's
+pytest suite in a separate job.
+
+The optional debug server has its own venv-isolated setup and tests — `cd server` and see
+`server/README.md`. Python packages are installed **only** inside `server/.venv`, never globally.
 
 ## Device build (when asked)
 

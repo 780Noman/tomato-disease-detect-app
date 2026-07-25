@@ -1,6 +1,13 @@
 # PLAN.md — Tomato Leaf Doctor
 
-**Status: approved (`PLAN_REVIEW_AND_MODEL_UPDATE.md`) and in build. Phases 1–4, 6 and 7 are complete and merged to `main` (scaffold+tooling, brand+design system, navigation shell, inference layer, capture flow, results screen — all checks green, 159 tests). Phase 5 (FastAPI, optional dev path) is BLOCKED by the no-pip-install rule (fastapi/pytest not present). Phases 8 (persistence/library/reports) and 9 (auth/hardening) are next. Machine constraint: Python package downloads forbidden; npm explicitly approved 2026-07-25. On-device inference remains guarded until `model_metadata.json` or `labels.txt` provides the class order.**
+**Status: ALL PHASES BUILT AND MERGED TO `main`.** Phases 1–9 complete: scaffold+tooling, brand+design system, navigation shell, inference layer, capture flow, honest results, offline history/library/PDF, optional accounts + offline hardening, and the venv-isolated FastAPI debug server. 228 app tests + 14 server tests green; typecheck 0 errors, lint 0 warnings.
+
+**Two items remain open, neither of which code can close:**
+
+1. **Class order (blocks real inference).** `model_metadata.json` or `labels.txt` has not been supplied. `CLASS_ORDER_VERIFIED` stays `false`; both real providers and the server's `/predict` refuse. When it arrives: update `src/config/classes.ts` only (order + `expectedTestSupport`), flip the flag, and report the verified order.
+2. **Device verification.** Deferred to an EAS development build, which also resolves the live model sanity inference and the `MODEL_SOURCE` packaging decision (bundled asset vs first-run download for 141 MB). Never marked done without evidence.
+
+Machine policy in force: npm allowed; pip allowed **only** inside `server/.venv` (per `GO_AHEAD_pip_and_phases.md`) — no global installs, and no TensorFlow on the app side.
 
 This plan is based on what was actually found in this repo, `docs_model_README.md`, `Tomato_Updated_Code_Review.md`, `TRAINING_GUIDE.md`, `train_tomato_corrected.py`, and a full read of both sibling projects. Where reality differs from CLAUDE.md or KICKOFF.md, the difference is stated, not papered over.
 

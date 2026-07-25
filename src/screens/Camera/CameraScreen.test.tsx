@@ -33,8 +33,13 @@ function renderCamera() {
 }
 
 describe('CameraScreen permission paths (CLAUDE.md §9)', () => {
-  it('shows a loading state before the permission is known', async () => {
-    mockUseCameraPermissions.mockReturnValue([null, jest.fn()]);
+  it.each([
+    ['null', null],
+    // The hook yields undefined before it resolves; reading .granted off it
+    // used to crash the screen into the error boundary.
+    ['undefined', undefined],
+  ])('shows a loading state while the permission is %s', async (_label, value) => {
+    mockUseCameraPermissions.mockReturnValue([value, jest.fn()]);
     await renderCamera();
     expect(screen.getByText('Checking camera permission…')).toBeTruthy();
   });

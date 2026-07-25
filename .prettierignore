@@ -5,3 +5,5 @@ web-build/
 coverage/
 docs/
 package-lock.json
+# Python side: formatted by Python tooling, and .venv vendors foreign JS.
+server/.venv/

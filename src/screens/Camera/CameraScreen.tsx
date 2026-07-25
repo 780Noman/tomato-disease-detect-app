@@ -23,8 +23,13 @@ export function CameraScreen() {
   // Only the remote path needs the network; on-device inference does not.
   const needsNetwork = env.inferenceProvider === 'remote' && online === false;
 
-  // Permission state not yet known (first render before the hook resolves).
-  if (permission === null) {
+  // Permission state not yet known. expo-camera types this as
+  // `PermissionResponse | null`, but the hook yields `undefined` before it
+  // resolves (observed under test, and reachable on a device if the native
+  // module is slow), so both are treated as "unknown" — reading `.granted`
+  // off undefined would crash the screen into the error boundary.
+  const permissionState: typeof permission | undefined = permission;
+  if (permissionState === null || permissionState === undefined) {
     return (
       <Screen scroll={false} testID="camera-screen">
         <LoadingState message="Checking camera permission…" />
@@ -32,8 +37,8 @@ export function CameraScreen() {
     );
   }
 
-  if (!permission.granted) {
-    if (permission.canAskAgain) {
+  if (!permissionState.granted) {
+    if (permissionState.canAskAgain) {
       return (
         <Screen scroll={false} testID="camera-screen">
           <View style={styles.permission}>
