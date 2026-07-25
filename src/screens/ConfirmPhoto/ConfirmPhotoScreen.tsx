@@ -17,12 +17,19 @@ export function ConfirmPhotoScreen() {
   return (
     <Screen testID="confirm-photo-screen">
       <View style={styles.stack}>
-        <Image
-          source={{ uri: imageUri }}
-          style={styles.preview}
-          resizeMode="cover"
-          accessibilityLabel="The photo you just took"
-        />
+        {/*
+          `contain`, not `cover`: this screen exists so the user can check the
+          framing before analysis. Cropping the preview would hide exactly the
+          edges they are being asked to judge.
+        */}
+        <View style={styles.previewFrame}>
+          <Image
+            source={{ uri: imageUri }}
+            style={styles.previewImage}
+            resizeMode="contain"
+            accessibilityLabel="The photo you just took"
+          />
+        </View>
         <Text variant="heading">Check the photo</Text>
         <Text tone="muted">
           One detached leaf, dark background, leaf filling the frame, no harsh shadows. If not,
@@ -46,10 +53,14 @@ export function ConfirmPhotoScreen() {
 
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
-  preview: {
-    width: '100%',
+  previewFrame: {
+    alignSelf: 'stretch',
     aspectRatio: 1,
     borderRadius: radii.lg,
+    overflow: 'hidden',
     backgroundColor: '#201914',
+  },
+  previewImage: {
+    ...StyleSheet.absoluteFillObject,
   },
 });

@@ -39,12 +39,20 @@ export function CaptureGuideScreen() {
       <View style={styles.stack}>
         <Text variant="title">How to photograph the leaf</Text>
 
-        <Image
-          source={require('../../../assets/capture-reference.png')}
-          style={styles.reference}
-          resizeMode="contain"
-          accessibilityLabel="Illustration of a single detached leaf laid flat on a dark surface, framed from directly above"
-        />
+        {/*
+          The frame is laid out by flex and the image fills its MEASURED size.
+          Putting width:'100%' + aspectRatio on the Image itself let Android
+          fall back to the asset's intrinsic 800px width, overflowing the
+          screen so only part of the illustration was visible.
+        */}
+        <View style={styles.referenceFrame}>
+          <Image
+            source={require('../../../assets/capture-reference.png')}
+            style={styles.referenceImage}
+            resizeMode="contain"
+            accessibilityLabel="Illustration of a single detached leaf laid flat on a dark surface, framed from directly above"
+          />
+        </View>
         <Text variant="caption" tone="muted" style={styles.center}>
           Illustration of a correctly staged leaf.
         </Text>
@@ -99,10 +107,15 @@ export function CaptureGuideScreen() {
 
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
-  reference: {
-    width: '100%',
+  referenceFrame: {
+    alignSelf: 'stretch',
     aspectRatio: 1,
     borderRadius: radii.lg,
+    overflow: 'hidden',
+    backgroundColor: '#201914',
+  },
+  referenceImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   steps: { gap: spacing.md },
   step: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },

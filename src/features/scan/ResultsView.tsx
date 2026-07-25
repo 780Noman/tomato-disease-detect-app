@@ -32,12 +32,15 @@ export function ResultsView({ imageUri, result }: ResultsViewProps) {
 
   return (
     <View style={styles.stack} testID="results-view">
-      <Image
-        source={{ uri: imageUri }}
-        style={styles.photo}
-        resizeMode="cover"
-        accessibilityLabel="The analysed leaf photo"
-      />
+      {/* Shows the whole image that was analysed, uncropped. */}
+      <View style={styles.photoFrame}>
+        <Image
+          source={{ uri: imageUri }}
+          style={styles.photoImage}
+          resizeMode="contain"
+          accessibilityLabel="The analysed leaf photo"
+        />
+      </View>
 
       {result.lowConfidence ? (
         <Card style={styles.card} testID="low-confidence-result">
@@ -95,11 +98,15 @@ export function ResultsView({ imageUri, result }: ResultsViewProps) {
 
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
-  photo: {
-    width: '100%',
+  photoFrame: {
+    alignSelf: 'stretch',
     aspectRatio: 1,
     borderRadius: radii.lg,
+    overflow: 'hidden',
     backgroundColor: '#201914',
+  },
+  photoImage: {
+    ...StyleSheet.absoluteFillObject,
   },
   card: { gap: spacing.sm },
   caveat: { gap: spacing.xs, marginTop: spacing.xs },
