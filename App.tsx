@@ -1,27 +1,34 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { Screen, Text } from '@/components';
+import { ComponentGallery } from '@/dev/ComponentGallery';
+import { ThemeProvider } from '@/theme';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tomato Leaf Doctor</Text>
-      <Text>Phase 1 scaffold — navigation and screens arrive in Phase 3.</Text>
+    <SafeAreaProvider>
+      {__DEV__ ? (
+        // Dev builds show the gallery until navigation lands in Phase 3.
+        <ComponentGallery />
+      ) : (
+        <ThemeProvider>
+          <Screen>
+            <Text variant="title" style={styles.center}>
+              Tomato Leaf Doctor
+            </Text>
+            <Text tone="muted" style={styles.center}>
+              Navigation and screens arrive in Phase 3.
+            </Text>
+          </Screen>
+        </ThemeProvider>
+      )}
       <StatusBar style="auto" />
-    </View>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF6F1',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
+  center: { textAlign: 'center' },
 });

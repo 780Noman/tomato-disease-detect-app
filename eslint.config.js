@@ -7,6 +7,19 @@ module.exports = [
   ...expoConfig,
   prettierConfig,
   {
+    // Node scripts (asset generation etc.), not app code.
+    files: ['tools/**/*.js'],
+    languageOptions: {
+      globals: {
+        __dirname: 'readonly',
+        require: 'readonly',
+        module: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+      },
+    },
+  },
+  {
     ignores: ['node_modules/**', '.expo/**', 'dist/**', 'web-build/**', 'coverage/**'],
   },
 ];

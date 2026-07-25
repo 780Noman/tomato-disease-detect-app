@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!--
+    Worked example for the capture guide: a single detached leaf laid flat on
+    a dark textured surface, framed from directly above, filling the frame.
+    Deliberately drawn as an illustration - never a fabricated photograph.
+  -->
+  <defs>
+    <path
+      id="ref-leaf-half"
+      d="M400 630 C356 617 299 590 269 546 L292 533 C266 499 252 466 256 432 L282 425 C259 389 255 355 269 325 L295 328 C282 295 299 255 332 238 L342 258 C355 238 379 221 400 215 L400 630 Z"
+    />
+    <radialGradient id="surface-light" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#332A24" />
+      <stop offset="100%" stop-color="#231C17" />
+    </radialGradient>
+  </defs>
+
+  <!-- dark textured surface -->
+  <rect width="800" height="800" rx="24" fill="url(#surface-light)" />
+  <g fill="#3B302A" opacity="0.55">
+    <circle cx="96" cy="152" r="5" /><circle cx="210" cy="84" r="4" /><circle cx="330" cy="140" r="6" />
+    <circle cx="500" cy="90" r="4" /><circle cx="650" cy="150" r="5" /><circle cx="726" cy="260" r="4" />
+    <circle cx="120" cy="330" r="4" /><circle cx="80" cy="520" r="6" /><circle cx="160" cy="680" r="5" />
+    <circle cx="320" cy="730" r="4" /><circle cx="520" cy="710" r="6" /><circle cx="680" cy="640" r="4" />
+    <circle cx="710" cy="450" r="5" /><circle cx="580" cy="260" r="4" /><circle cx="240" cy="560" r="4" />
+    <circle cx="440" cy="120" r="3" /><circle cx="60" cy="240" r="3" /><circle cx="740" cy="560" r="3" />
+  </g>
+
+  <!-- single detached leaf, laid flat, filling the frame -->
+  <g transform="translate(400 420) scale(1.24) translate(-400 -420)">
+    <use href="#ref-leaf-half" fill="#5F7050" />
+    <use href="#ref-leaf-half" fill="#556546" transform="translate(800 0) scale(-1 1)" />
+    <!-- stem -->
+    <path d="M400 630 L400 682" stroke="#556546" stroke-width="16" stroke-linecap="round" />
+    <!-- midrib and veins -->
+    <g stroke="#42523A" stroke-width="9" stroke-linecap="round" fill="none">
+      <path d="M400 610 L400 240" />
+      <path d="M400 540 L318 484" /><path d="M400 540 L482 484" />
+      <path d="M400 452 L330 400" /><path d="M400 452 L470 400" />
+      <path d="M400 366 L342 322" /><path d="M400 366 L458 322" />
+    </g>
+  </g>
+
+  <!-- framing brackets: fill the frame like this -->
+  <g stroke="#F2E3DA" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.9">
+    <path d="M132 60 L92 60 Q60 60 60 92 L60 132" />
+    <path d="M668 60 L708 60 Q740 60 740 92 L740 132" />
+    <path d="M132 740 L92 740 Q60 740 60 708 L60 668" />
+    <path d="M668 740 L708 740 Q740 740 740 708 L740 668" />
+  </g>
+</svg>
