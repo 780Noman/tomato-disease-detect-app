@@ -1,10 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { Button, Card, Screen, Text } from '@/components';
-import { radii, spacing } from '@/theme';
+import { Button, Card, PhotoFrame, Screen, Text } from '@/components';
+import { spacing } from '@/theme';
 
 const STEPS = [
   'Detach one leaf from the plant.',
@@ -15,7 +15,6 @@ const STEPS = [
 
 export function CaptureGuideScreen() {
   const navigation = useNavigation();
-  const [showWhy, setShowWhy] = useState(false);
   const [pickerError, setPickerError] = useState<string | null>(null);
 
   async function pickFromGallery(): Promise<void> {
@@ -39,20 +38,11 @@ export function CaptureGuideScreen() {
       <View style={styles.stack}>
         <Text variant="title">How to photograph the leaf</Text>
 
-        {/*
-          The frame is laid out by flex and the image fills its MEASURED size.
-          Putting width:'100%' + aspectRatio on the Image itself let Android
-          fall back to the asset's intrinsic 800px width, overflowing the
-          screen so only part of the illustration was visible.
-        */}
-        <View style={styles.referenceFrame}>
-          <Image
-            source={require('../../../assets/capture-reference.png')}
-            style={styles.referenceImage}
-            resizeMode="contain"
-            accessibilityLabel="Illustration of a single detached leaf laid flat on a dark surface, framed from directly above"
-          />
-        </View>
+        <PhotoFrame
+          source={require('../../../assets/capture-reference.png')}
+          accessibilityLabel="Illustration of a single detached leaf laid flat on a dark surface, framed from directly above"
+          testID="capture-reference"
+        />
         <Text variant="caption" tone="muted" style={styles.center}>
           Illustration of a correctly staged leaf.
         </Text>
@@ -68,21 +58,20 @@ export function CaptureGuideScreen() {
           ))}
         </Card>
 
-        <Button
-          label="Why does this matter?"
-          variant="ghost"
-          onPress={() => setShowWhy(!showWhy)}
-          testID="toggle-why"
-        />
-        {showWhy ? (
-          <Card>
-            <Text>
-              The model learned only from photos staged exactly like this — one detached leaf on a
-              dark background. A photo of a leaf still on the plant will produce a confident-looking
-              answer that means nothing.
-            </Text>
-          </Card>
-        ) : null}
+        {/*
+          Always visible rather than behind a toggle. CLAUDE.md §5 requires the
+          user to be told WHY the staging matters; a photo of a leaf still on
+          the plant returns a confident, meaningless answer, so this must not
+          be something the user has to go looking for.
+        */}
+        <Card>
+          <Text variant="label">Why this matters</Text>
+          <Text tone="muted">
+            The model learned only from photos staged exactly like this — one detached leaf on a
+            dark background. A photo of a leaf still on the plant will produce a confident-looking
+            answer that means nothing.
+          </Text>
+        </Card>
 
         <Button
           label="Open camera"
@@ -107,16 +96,6 @@ export function CaptureGuideScreen() {
 
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
-  referenceFrame: {
-    alignSelf: 'stretch',
-    aspectRatio: 1,
-    borderRadius: radii.lg,
-    overflow: 'hidden',
-    backgroundColor: '#201914',
-  },
-  referenceImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
   steps: { gap: spacing.md },
   step: { flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' },
   stepText: { flex: 1 },

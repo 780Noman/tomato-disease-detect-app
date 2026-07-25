@@ -8,5 +8,6 @@ export { ErrorState } from './ErrorState';
 export { FramingOverlay } from './FramingOverlay';
 export { LoadingState } from './LoadingState';
 export { Logo } from './Logo';
+export { PhotoFrame } from './PhotoFrame';
 export { Screen } from './Screen';
 export { Text, type TextTone } from './Text';

@@ -1,9 +1,9 @@
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import type { RootStackParamList } from '@/app/navigation/types';
-import { Button, Screen, Text } from '@/components';
-import { radii, spacing } from '@/theme';
+import { Button, PhotoFrame, Screen, Text } from '@/components';
+import { spacing } from '@/theme';
 
 /**
  * The confirm/retake step (CLAUDE.md §5): the user checks the staging —
@@ -18,18 +18,15 @@ export function ConfirmPhotoScreen() {
     <Screen testID="confirm-photo-screen">
       <View style={styles.stack}>
         {/*
-          `contain`, not `cover`: this screen exists so the user can check the
-          framing before analysis. Cropping the preview would hide exactly the
+          The whole photo, uncropped: this screen exists so the user can check
+          the framing before analysis, and cropping would hide exactly the
           edges they are being asked to judge.
         */}
-        <View style={styles.previewFrame}>
-          <Image
-            source={{ uri: imageUri }}
-            style={styles.previewImage}
-            resizeMode="contain"
-            accessibilityLabel="The photo you just took"
-          />
-        </View>
+        <PhotoFrame
+          source={{ uri: imageUri }}
+          accessibilityLabel="The photo you just took"
+          testID="photo-preview"
+        />
         <Text variant="heading">Check the photo</Text>
         <Text tone="muted">
           One detached leaf, dark background, leaf filling the frame, no harsh shadows. If not,
@@ -53,14 +50,4 @@ export function ConfirmPhotoScreen() {
 
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
-  previewFrame: {
-    alignSelf: 'stretch',
-    aspectRatio: 1,
-    borderRadius: radii.lg,
-    overflow: 'hidden',
-    backgroundColor: '#201914',
-  },
-  previewImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
 });

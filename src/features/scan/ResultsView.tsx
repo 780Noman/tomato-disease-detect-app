@@ -1,6 +1,6 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { Badge, Card, CategoryPill, ConfidenceBar, Text } from '@/components';
+import { Badge, Card, CategoryPill, ConfidenceBar, PhotoFrame, Text } from '@/components';
 import { CLASS_INFO, categoryDisplayName, isLimitedDataClass } from '@/config/classes';
 import {
   confidenceBand,
@@ -9,7 +9,7 @@ import {
   TOP_PREDICTIONS_SHOWN,
 } from '@/config/thresholds';
 import type { Classification } from '@/inference';
-import { radii, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 interface ResultsViewProps {
   readonly imageUri: string;
@@ -32,15 +32,12 @@ export function ResultsView({ imageUri, result }: ResultsViewProps) {
 
   return (
     <View style={styles.stack} testID="results-view">
-      {/* Shows the whole image that was analysed, uncropped. */}
-      <View style={styles.photoFrame}>
-        <Image
-          source={{ uri: imageUri }}
-          style={styles.photoImage}
-          resizeMode="contain"
-          accessibilityLabel="The analysed leaf photo"
-        />
-      </View>
+      {/* The whole image that was analysed, uncropped. */}
+      <PhotoFrame
+        source={{ uri: imageUri }}
+        accessibilityLabel="The analysed leaf photo"
+        testID="analysed-photo"
+      />
 
       {result.lowConfidence ? (
         <Card style={styles.card} testID="low-confidence-result">
@@ -98,16 +95,6 @@ export function ResultsView({ imageUri, result }: ResultsViewProps) {
 
 const styles = StyleSheet.create({
   stack: { gap: spacing.md },
-  photoFrame: {
-    alignSelf: 'stretch',
-    aspectRatio: 1,
-    borderRadius: radii.lg,
-    overflow: 'hidden',
-    backgroundColor: '#201914',
-  },
-  photoImage: {
-    ...StyleSheet.absoluteFillObject,
-  },
   card: { gap: spacing.sm },
   caveat: { gap: spacing.xs, marginTop: spacing.xs },
   healthyNote: { textAlign: 'center', paddingHorizontal: spacing.md },
