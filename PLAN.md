@@ -29,7 +29,9 @@ This plan is based on what was actually found in this repo, `docs_model_README.m
 
 Proposed fixes (Phase 1): `git init` + `main` branch; move the four root docs into `docs/` (with `docs/model/README.md` from `docs_model_README.md`) so paths match every cross-reference inside the docs themselves. The two missing documents are listed under Open Questions — nothing in this plan depends on them, but the capture-protocol details and any treatment content in them would be used if provided.
 
-### 1.2 The model situation (UPDATED — the on-device model arrived and was inspected)
+### 1.2 The model situation (historical record — superseded by the class-order resolution at the top of this file)
+
+> The findings below were written before the class order was verified. They are kept as the record of what was known at the time; where they say the order is unverified, see the resolution note at the top.
 
 - **`Tomato_Model_Mobile.tflite` (140.7 MB) now exists** and was inspected without TensorFlow via `tools/inspect_tflite_offline.py` (pure-stdlib FlatBuffer reader — the provided `inspect_tflite.py` needs a working interpreter, and installs are not permitted). Contract read directly from the file:
   - Input `[1, 224, 224, 3]` float32, unquantised → feed raw 0–255 floats, consistent with the training contract.

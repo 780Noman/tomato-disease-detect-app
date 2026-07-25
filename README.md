@@ -68,16 +68,16 @@ cp .env.example .env    # defaults are fine for development
 npm start
 ```
 
-`.env` is gitignored. Every variable is optional in development: with none set the app uses the
-deterministic mock provider and no account.
+`.env` is gitignored. The committed `.env.example` sets `mock` so the UI is workable before the
+model is packaged; with no `.env` at all the app defaults to the real on-device provider.
 
 ### Environment variables
 
-| Variable                         | Purpose                                                           |
-| -------------------------------- | ----------------------------------------------------------------- |
-| `EXPO_PUBLIC_INFERENCE_PROVIDER` | `mock` (default), `tflite` (on-device, primary), `remote` (debug) |
-| `EXPO_PUBLIC_REMOTE_API_URL`     | Required only for `remote`                                        |
-| `EXPO_PUBLIC_FIREBASE_*`         | Optional accounts — all four together, or none                    |
+| Variable                         | Purpose                                                                |
+| -------------------------------- | ---------------------------------------------------------------------- |
+| `EXPO_PUBLIC_INFERENCE_PROVIDER` | `tflite` (on-device, **default**), `mock` (dev only), `remote` (debug) |
+| `EXPO_PUBLIC_REMOTE_API_URL`     | Required only for `remote`                                             |
+| `EXPO_PUBLIC_FIREBASE_*`         | Optional accounts — all four together, or none                         |
 
 ## Checks
 
