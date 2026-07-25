@@ -1,6 +1,6 @@
 # PLAN.md — Tomato Leaf Doctor
 
-**Status: approved (`PLAN_REVIEW_AND_MODEL_UPDATE.md`) and revised — `Tomato_Model_Mobile.tflite` (141 MB) arrived, was inspected offline, and on-device inference is now the primary path. Machine constraint: no package downloads without explicit permission (TensorFlow on this machine is broken by an old protobuf; the model was inspected with a pure-stdlib flatbuffer reader instead).**
+**Status: approved (`PLAN_REVIEW_AND_MODEL_UPDATE.md`) and in build. Phases 1–4, 6 and 7 are complete and merged to `main` (scaffold+tooling, brand+design system, navigation shell, inference layer, capture flow, results screen — all checks green, 159 tests). Phase 5 (FastAPI, optional dev path) is BLOCKED by the no-pip-install rule (fastapi/pytest not present). Phases 8 (persistence/library/reports) and 9 (auth/hardening) are next. Machine constraint: Python package downloads forbidden; npm explicitly approved 2026-07-25. On-device inference remains guarded until `model_metadata.json` or `labels.txt` provides the class order.**
 
 This plan is based on what was actually found in this repo, `docs_model_README.md`, `Tomato_Updated_Code_Review.md`, `TRAINING_GUIDE.md`, `train_tomato_corrected.py`, and a full read of both sibling projects. Where reality differs from CLAUDE.md or KICKOFF.md, the difference is stated, not papered over.
 
