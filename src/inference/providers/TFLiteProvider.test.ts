@@ -24,7 +24,10 @@ describe('TFLiteProvider (guard bypassed)', () => {
     mockRun.mockReset();
   });
 
-  it('fails loudly with model-not-loaded while MODEL_SOURCE is unset (default loader)', async () => {
+  it('reports model-not-loaded when the native runtime is unavailable (default loader)', async () => {
+    // Under Jest the native fast-tflite binding cannot load, which is the same
+    // failure shape as a broken/missing model on device: a typed error, never
+    // a fabricated result.
     const provider = new TFLiteProvider();
     await expect(provider.load()).rejects.toMatchObject({ code: 'model-not-loaded' });
     expect(provider.isReady()).toBe(false);

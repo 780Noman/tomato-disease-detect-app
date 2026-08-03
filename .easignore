@@ -1,0 +1,55 @@
+# EAS Build reads THIS instead of .gitignore when deciding what to upload.
+# It therefore has to repeat the .gitignore rules, with one deliberate
+# exception at the bottom: the on-device model, which is gitignored (141 MB)
+# but MUST reach the build server or Metro cannot bundle it.
+
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+*.log
+
+# Never upload local env values. EAS supplies env vars itself, and a local
+# .env selecting the mock provider would break the release build — the mock
+# deliberately refuses to run outside development.
+.env
+.env.*
+!.env.example
+
+# The Python debug server plays no part in a mobile build.
+server/
+
+# Training dataset: never needed to build the app.
+Balance DataSet Without Healthy Class/
+Balance DataSet Without Healthy Class.zip
+
+# Other model artefacts stay out.
+*.keras
+*.h5
+docs/model/
+
+# Model: exclude the extension everywhere, then re-include exactly the one
+# asset the app requires at build time.
+*.tflite
+!assets/model/Tomato_Model_Mobile.tflite
+
+# Expo / native / OS noise
+expo-env.d.ts
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+*.tsbuildinfo
+/ios
+/android
+.DS_Store
+Thumbs.db
+*.pem
+__pycache__/
+*.pyc
+.pytest_cache/
