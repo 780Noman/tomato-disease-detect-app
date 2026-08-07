@@ -38,6 +38,7 @@ export const TFLITE_MODEL_CONFIG: TfliteModelConfig = {
  * `require` of a .tflite returns Metro's numeric asset id (see
  * metro.config.js, which registers the extension).
  */
-// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro asset require; there is no import form for binary assets.
-export const MODEL_SOURCE: number | string | undefined =
-  require('../../assets/model/Tomato_Model_Mobile.tflite') as number;
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro asset require; binary assets have no import form.
+const bundledModel = require('../../assets/model/Tomato_Model_Mobile.tflite') as number;
+
+export const MODEL_SOURCE: number | string | undefined = bundledModel;

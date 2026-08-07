@@ -25,7 +25,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.CAMERA", "android.permission.RECORD_AUDIO"]
+      "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -34,7 +34,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Tomato Leaf Doctor uses the camera to photograph a single detached tomato leaf for diagnosis."
+          "cameraPermission": "Tomato Leaf Doctor uses the camera to photograph a single detached tomato leaf for diagnosis.",
+          "recordAudioAndroid": false
         }
       ],
       [

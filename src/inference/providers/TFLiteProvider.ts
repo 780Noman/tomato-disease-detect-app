@@ -1,5 +1,5 @@
 import { assertClassOrderVerified } from '../classGuard';
-import { InferenceError } from '../errors';
+import { InferenceError, messageFor } from '../errors';
 import type { InferenceProvider } from '../InferenceProvider';
 import { MODEL_SOURCE, TFLITE_MODEL_CONFIG } from '../modelConfig';
 import { prepareModelInput } from '../preprocess/prepareModelInput';
@@ -12,6 +12,19 @@ export interface TfliteModel {
 }
 
 export type ModelLoader = () => Promise<TfliteModel>;
+
+/** Best-effort one-line description of an unknown thrown value. */
+function describeCause(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message.length > 0 ? error.message : error.name;
+  }
+  if (typeof error === 'string') return error;
+  try {
+    return JSON.stringify(error) ?? 'unknown error';
+  } catch {
+    return 'unknown error';
+  }
+}
 
 /**
  * Default loader: dynamic import keeps the native fast-tflite binding out of
@@ -59,7 +72,14 @@ export class TFLiteProvider implements InferenceProvider {
       this.model = await this.loader();
     } catch (error) {
       if (error instanceof InferenceError) throw error;
-      throw new InferenceError('model-not-loaded', undefined, { cause: error });
+      // Surface the underlying reason. Without it this failure is
+      // indistinguishable from a dozen others on a device with no debugger
+      // attached, and diagnosing it becomes guesswork.
+      throw new InferenceError(
+        'model-not-loaded',
+        `${messageFor('model-not-loaded')}\n\nTechnical detail: ${describeCause(error)}`,
+        { cause: error },
+      );
     }
   }
 
