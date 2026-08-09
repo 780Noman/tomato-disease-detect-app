@@ -7,8 +7,8 @@ module.exports = [
   ...expoConfig,
   prettierConfig,
   {
-    // Node scripts (asset generation etc.), not app code.
-    files: ['tools/**/*.js'],
+    // Node scripts (asset generation, Expo config plugins), not app code.
+    files: ['tools/**/*.js', 'plugins/**/*.js'],
     languageOptions: {
       globals: {
         __dirname: 'readonly',

@@ -45,7 +45,9 @@
         }
       ],
       "react-native-fast-tflite",
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-asset",
+      "./plugins/withAndroidLargeHeap"
     ],
     "extra": {
       "eas": {

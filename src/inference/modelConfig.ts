@@ -33,10 +33,13 @@ export const TFLITE_MODEL_CONFIG: TfliteModelConfig = {
 };
 
 /**
- * Asset/require source or file URI for react-native-fast-tflite.
+ * The model source: Metro's numeric asset id for the bundled `.tflite` (see
+ * metro.config.js, which registers the extension), or an absolute URI.
  *
- * `require` of a .tflite returns Metro's numeric asset id (see
- * metro.config.js, which registers the extension).
+ * This value is NOT passed to react-native-fast-tflite directly. An asset id
+ * resolves to a bare `res/raw` resource name in release builds, which the
+ * library's Java `URL(..)` call cannot open. It is resolved to an absolute
+ * `file://` URI first — see providers/resolveModelUri.ts.
  */
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro asset require; binary assets have no import form.
 const bundledModel = require('../../assets/model/Tomato_Model_Mobile.tflite') as number;

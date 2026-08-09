@@ -5,6 +5,8 @@ import { MODEL_SOURCE, TFLITE_MODEL_CONFIG } from '../modelConfig';
 import { prepareModelInput } from '../preprocess/prepareModelInput';
 import { toClassification } from '../rank';
 import type { Classification, InferenceInput } from '../types';
+import { resolveExpoAssetUri } from './expoAssetUri';
+import { resolveModelUri } from './resolveModelUri';
 
 /** Subset of react-native-fast-tflite this provider relies on (v3 API). */
 export interface TfliteModel {
@@ -33,18 +35,13 @@ function describeCause(error: unknown): string {
  * unit-tested by injecting a stub loader.
  */
 export async function defaultModelLoader(): Promise<TfliteModel> {
-  if (MODEL_SOURCE === undefined) {
-    throw new InferenceError(
-      'model-not-loaded',
-      'MODEL_SOURCE is not set (src/inference/modelConfig.ts). The 141 MB model exists but its packaging (bundled asset vs downloaded file) is decided in the EAS build phase.',
-    );
-  }
+  // Always resolve to an absolute URI first and pass `{ url }`. Handing the
+  // library a require() asset id works in dev and fails in release builds —
+  // see resolveModelUri.ts for the full explanation.
+  const uri = await resolveModelUri(MODEL_SOURCE, resolveExpoAssetUri);
   const { loadTensorflowModel } = await import('react-native-fast-tflite');
   // Empty delegates array = default CPU delegate.
-  const model = await loadTensorflowModel(
-    typeof MODEL_SOURCE === 'string' ? { url: MODEL_SOURCE } : MODEL_SOURCE,
-    [],
-  );
+  const model = await loadTensorflowModel({ url: uri }, []);
   return model as unknown as TfliteModel;
 }
 
