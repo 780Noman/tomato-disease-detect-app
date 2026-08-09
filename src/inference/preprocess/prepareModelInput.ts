@@ -1,5 +1,6 @@
 import * as jpeg from 'jpeg-js';
 
+import { base64ToBytes } from './base64';
 import { packRgbFloat32 } from './pixels';
 import { InferenceError } from '../errors';
 import { TFLITE_MODEL_CONFIG } from '../modelConfig';
@@ -47,18 +48,4 @@ export async function prepareModelInput(imageUri: string): Promise<Float32Array>
   }
 
   return packRgbFloat32(decoded.data, decoded.width, decoded.height);
-}
-
-export function base64ToBytes(base64: string): Uint8Array {
-  // atob exists in Hermes and in Jest via jsdom-free RN preset polyfills;
-  // Buffer covers Node. Prefer whichever is available.
-  if (typeof Buffer !== 'undefined') {
-    return new Uint8Array(Buffer.from(base64, 'base64'));
-  }
-  const binary = globalThis.atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes;
 }
