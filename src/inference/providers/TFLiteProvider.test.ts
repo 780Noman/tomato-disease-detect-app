@@ -1,4 +1,4 @@
-import { TFLiteProvider, type TfliteModel } from './TFLiteProvider';
+import { codeForNativeLoadFailure, TFLiteProvider, type TfliteModel } from './TFLiteProvider';
 
 // The real guard's blocking is covered in RemoteProvider.guard.test.ts;
 // here it is bypassed to exercise the wiring behind it.
@@ -18,6 +18,23 @@ async function loadedProvider(): Promise<TFLiteProvider> {
   await provider.load();
   return provider;
 }
+
+describe('codeForNativeLoadFailure', () => {
+  it('maps the TFLite unresolved-ops status to model-incompatible', () => {
+    expect(codeForNativeLoadFailure('TFLite: ... Status: unresolved-ops')).toBe(
+      'model-incompatible',
+    );
+  });
+
+  it('leaves every other failure as model-not-loaded', () => {
+    expect(codeForNativeLoadFailure('MalformedURLException: no protocol: assets_x')).toBe(
+      'model-not-loaded',
+    );
+    expect(codeForNativeLoadFailure('Status: error')).toBe('model-not-loaded');
+    expect(codeForNativeLoadFailure('java.lang.OutOfMemoryError')).toBe('model-not-loaded');
+    expect(codeForNativeLoadFailure('')).toBe('model-not-loaded');
+  });
+});
 
 describe('TFLiteProvider (guard bypassed)', () => {
   beforeEach(() => {
@@ -71,6 +88,23 @@ describe('TFLiteProvider (guard bypassed)', () => {
     await expect(provider.run({ imageUri: 'file:///leaf.jpg' })).rejects.toMatchObject({
       code: 'model-not-loaded',
     });
+  });
+
+  it('reports a Flex-op model as incompatible, not as a load or memory failure', async () => {
+    // The verbatim native failure from the 2026-08-09 APK. Its text blames
+    // memory; the `unresolved-ops` status is what actually happened.
+    const nativeMessage =
+      'TfliteModule.createModel(...): TFLite: Failed to allocate memory for input/output tensors! Status: unresolved-ops';
+    const provider = new TFLiteProvider(() => Promise.reject(new Error(nativeMessage)));
+
+    await expect(provider.load()).rejects.toMatchObject({ code: 'model-incompatible' });
+    // The technical detail must survive: it is the only on-device diagnostic.
+    await expect(provider.load()).rejects.toThrow(/unresolved-ops/);
+  });
+
+  it('still reports other load failures as model-not-loaded', async () => {
+    const provider = new TFLiteProvider(() => Promise.reject(new Error('no protocol: assets_x')));
+    await expect(provider.load()).rejects.toMatchObject({ code: 'model-not-loaded' });
   });
 
   it('dispose() releases the model', async () => {

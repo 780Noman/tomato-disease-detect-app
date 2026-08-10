@@ -29,6 +29,26 @@ function describeCause(error: unknown): string {
 }
 
 /**
+ * Distinguishes "the model could not be loaded" from "the model loaded but
+ * this runtime cannot execute it".
+ *
+ * fast-tflite surfaces TFLite's status string verbatim. `unresolved-ops` is
+ * kTfLiteUnresolvedOps, raised by TfLiteInterpreterAllocateTensors when the
+ * op resolver has no implementation for an operator in the graph — in
+ * practice a model exported with TF Select (Flex) ops, which needs a delegate
+ * this library does not bundle. The accompanying native text says "Failed to
+ * allocate memory for input/output tensors", which reads as an out-of-memory
+ * failure and is not one; the status is the part that tells the truth.
+ * Reporting it as a memory problem sends the fix in the wrong direction, so
+ * it gets its own code.
+ */
+export function codeForNativeLoadFailure(
+  detail: string,
+): 'model-not-loaded' | 'model-incompatible' {
+  return detail.includes('unresolved-ops') ? 'model-incompatible' : 'model-not-loaded';
+}
+
+/**
  * Default loader: dynamic import keeps the native fast-tflite binding out of
  * the mock/test path entirely. Jest cannot execute dynamic import(), so this
  * function is exercised on-device only — everything else in the provider is
@@ -72,11 +92,11 @@ export class TFLiteProvider implements InferenceProvider {
       // Surface the underlying reason. Without it this failure is
       // indistinguishable from a dozen others on a device with no debugger
       // attached, and diagnosing it becomes guesswork.
-      throw new InferenceError(
-        'model-not-loaded',
-        `${messageFor('model-not-loaded')}\n\nTechnical detail: ${describeCause(error)}`,
-        { cause: error },
-      );
+      const detail = describeCause(error);
+      const code = codeForNativeLoadFailure(detail);
+      throw new InferenceError(code, `${messageFor(code)}\n\nTechnical detail: ${detail}`, {
+        cause: error,
+      });
     }
   }
 

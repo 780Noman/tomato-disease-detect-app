@@ -11,6 +11,7 @@ export type InferenceErrorCode =
   | 'invalid-response'
   | 'image-unreadable'
   | 'model-not-loaded'
+  | 'model-incompatible'
   | 'class-order-unverified'
   | 'mock-in-production';
 
@@ -26,6 +27,8 @@ const DEFAULT_MESSAGES: Record<InferenceErrorCode, string> = {
   'image-unreadable': 'This image could not be read. Retake the photo and try again.',
   'model-not-loaded':
     'The on-device model is not available on this build, so no diagnosis was made.',
+  'model-incompatible':
+    'The model file in this build cannot run on this device: it needs TensorFlow operators that the on-device runtime does not include. No diagnosis was made. Fixing this needs the model re-exported with TFLite built-in operators only (tools/convert_tflite_builtins_only.py) — it cannot be fixed in the app.',
   'class-order-unverified':
     'Developer: the class index order is UNVERIFIED (config/classes.ts). Real inference is disabled until model_metadata.json confirms the order. Use the mock provider.',
   'mock-in-production': 'Developer: MockProvider must never run in a production build.',

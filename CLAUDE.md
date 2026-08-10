@@ -65,6 +65,12 @@ If you have seen the sibling Apple Leaf Doctor project, note the difference clea
 > **The class order is VERIFIED.** It is determined by the training script's `sorted(df['label'].unique())` and was confirmed against the dataset's class folder names sorted alphabetically: `JAS_MIT, K, LM, MIT, N, N_K`. `CLASS_ORDER_VERIFIED` is `true`. The guard described below is unchanged and still tested in both directions — do not delete it.
 >
 > Still open: packaging the model into a build (`MODEL_SOURCE`), and device verification via EAS. **Model accuracy remains unsettled** and is a research-side concern; §7's honesty rules matter more because of it, not less.
+>
+> **Update 2026-08-09 — THE DELIVERED MODEL CANNOT RUN ON-DEVICE.** Packaging is now solved and verified, but the model file itself is unusable. A release APK loads it and then fails inside `TfLiteInterpreterAllocateTensors` with `Status: unresolved-ops`. `tools/inspect_tflite_ops.py` read the file's own bytes: the graph contains **800+ TF Select ("Flex") operators**, including 201× `FlexConv2D`, 198× `FlexMul`, 191× `FlexSigmoid`, plus a custom `Erfc`. Flex ops are TensorFlow ops, not TFLite ops; executing them needs the Flex delegate, which `react-native-fast-tflite` does not bundle and cannot reasonably bundle (it is ~100 MB on its own).
+>
+> **This is not fixable in app code.** Do not attempt to work around it in the provider, and never add `SELECT_TF_OPS` to a conversion — that option is what caused it. The model must be re-exported with `TFLITE_BUILTINS` only; `tools/convert_tflite_builtins_only.py` does this and self-verifies with a stock interpreter. Run `npm run verify:model` before any build: it fails on a model carrying custom ops, so this class of defect can never reach an APK again.
+>
+> Until a builtins-only model exists, on-device diagnosis is **blocked**. The app reports it honestly via the `model-incompatible` error code and fabricates nothing. The `remote` provider and `server/` remain the working fallback.
 
 The model is **not finalised**. A technical review is in `docs/Tomato_Updated_Code_Review.md` — read it, it explains why. Summary of what is pending:
 

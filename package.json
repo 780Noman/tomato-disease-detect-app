@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
+    "verify:model": "python tools/inspect_tflite_ops.py assets/model/Tomato_Model_Mobile.tflite",
     "prepare": "husky"
   },
   "dependencies": {
