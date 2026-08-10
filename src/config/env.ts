@@ -48,14 +48,40 @@ function isProviderName(value: string): value is InferenceProviderName {
 }
 
 /**
- * On-device inference is the primary path, so it is the default when nothing
- * is configured. Development and tests select `mock` explicitly via .env /
- * jest.setup.ts — a build that says nothing gets the real provider, not a
- * simulated one.
+ * The deployed inference server.
+ *
+ * Committed as a constant rather than read from `.env`, because `.easignore`
+ * excludes `.env` from the EAS upload — a release build sees no environment
+ * variables at all, so anything that must reach an APK has to live in the
+ * source. This is a public endpoint, not a secret.
+ *
+ * An empty value means "not configured yet". `npm run verify:release` fails
+ * while it is empty, so an APK cannot be built without it.
  */
-export const DEFAULT_INFERENCE_PROVIDER: InferenceProviderName = 'tflite';
+export const DEFAULT_REMOTE_API_URL = '';
 
-export function readEnv(source: EnvSource): Env {
+/**
+ * Server-backed inference is the shipping path (owner decision, 2026-08-10).
+ *
+ * It was `tflite`. The delivered model cannot run on-device: it was exported
+ * with TF Select (Flex) operators that no bundled TFLite runtime can resolve,
+ * and the training code needed to re-export it is not available to this
+ * project. Diagnosis therefore requires a network connection, which the app
+ * states plainly — see features/connectivity.
+ *
+ * Development and tests select `mock` explicitly via .env / jest.setup.ts; a
+ * build that says nothing gets the real provider, not a simulated one.
+ */
+export const DEFAULT_INFERENCE_PROVIDER: InferenceProviderName = 'remote';
+
+/**
+ * @param fallbackRemoteUrl Injected so tests are not coupled to the committed
+ *   constant. Production passes the default.
+ */
+export function readEnv(
+  source: EnvSource,
+  fallbackRemoteUrl: string = DEFAULT_REMOTE_API_URL,
+): Env {
   const provider = source.EXPO_PUBLIC_INFERENCE_PROVIDER ?? DEFAULT_INFERENCE_PROVIDER;
   if (!isProviderName(provider)) {
     throw new EnvError(
@@ -63,14 +89,16 @@ export function readEnv(source: EnvSource): Env {
     );
   }
 
-  const rawUrl = source.EXPO_PUBLIC_REMOTE_API_URL?.trim();
-  const remoteApiUrl = rawUrl ? rawUrl : null;
+  // An explicit non-empty env var wins; otherwise fall back to the committed
+  // constant. A blank env var is treated as "unset", not as "no server".
+  const explicitUrl = source.EXPO_PUBLIC_REMOTE_API_URL?.trim() ?? '';
+  const rawUrl = explicitUrl.length > 0 ? explicitUrl : fallbackRemoteUrl.trim();
+  const remoteApiUrl = rawUrl.length > 0 ? rawUrl : null;
 
-  if (provider === 'remote' && remoteApiUrl === null) {
-    throw new EnvError(
-      'EXPO_PUBLIC_REMOTE_API_URL is required when EXPO_PUBLIC_INFERENCE_PROVIDER is "remote".',
-    );
-  }
+  // Deliberately NOT thrown when the remote provider has no URL. This runs at
+  // module scope, so throwing here white-screens the app before the error
+  // boundary exists. The provider factory raises a typed InferenceError
+  // instead, which the UI renders as a readable failure.
   if (remoteApiUrl !== null && !/^https?:\/\//.test(remoteApiUrl)) {
     throw new EnvError(
       `EXPO_PUBLIC_REMOTE_API_URL must start with http:// or https://; got "${remoteApiUrl}".`,

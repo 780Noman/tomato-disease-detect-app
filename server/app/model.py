@@ -111,15 +111,30 @@ class ModelService:
             )
 
     def _load_tflite(self, path: Path) -> Predictor:
+        # ORDER MATTERS. Full TensorFlow is tried FIRST because this model
+        # requires the Flex (Select TF ops) delegate: tools/inspect_tflite_ops.py
+        # found 800+ Flex operators in it, including 201x FlexConv2D. The TF pip
+        # package registers that delegate automatically; tflite_runtime does not
+        # ship it at all and fails with kTfLiteUnresolvedOps -- the exact failure
+        # that makes this model unusable on-device.
         try:
-            from tflite_runtime.interpreter import Interpreter  # type: ignore[import-not-found]
-        except ImportError:
             import tensorflow as tf  # type: ignore[import-not-found]
 
             Interpreter = tf.lite.Interpreter
+        except ImportError:
+            from tflite_runtime.interpreter import (  # type: ignore[import-not-found]
+                Interpreter,
+            )
 
         interpreter = Interpreter(model_path=str(path))
-        interpreter.allocate_tensors()
+        try:
+            interpreter.allocate_tensors()
+        except Exception as exc:  # noqa: BLE001 - re-raised with the actionable reason
+            raise ValueError(
+                f"allocate_tensors() failed for {path.name}: {exc}. If this mentions "
+                "unresolved ops or Select TF ops, the runtime lacks the Flex delegate: "
+                "install the full `tensorflow` package, not tflite-runtime."
+            ) from exc
         input_detail = interpreter.get_input_details()[0]
         output_detail = interpreter.get_output_details()[0]
 

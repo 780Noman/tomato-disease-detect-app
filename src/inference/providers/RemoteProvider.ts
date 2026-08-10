@@ -8,9 +8,10 @@ import type { Classification, InferenceInput } from '../types';
 import { CLASS_CODES, isClassCode } from '@/config/classes';
 
 /**
- * FastAPI fallback (dev/debug — on-device is the primary path). Maps the
- * response BY CLASS NAME, never by array position, so a server and app
- * built from the same config cannot disagree silently.
+ * The shipping inference path (owner decision, 2026-08-10): a FastAPI server,
+ * deployed as a Hugging Face Space. Maps the response BY CLASS NAME, never by
+ * array position, so a server and app built from the same config cannot
+ * disagree silently.
  */
 
 interface PredictResponse {
@@ -18,7 +19,17 @@ interface PredictResponse {
   readonly model_version?: string;
 }
 
-const REQUEST_TIMEOUT_MS = 20_000;
+/**
+ * Generous on purpose. A free Hugging Face Space is stopped after a period of
+ * inactivity and has to start a container before it can answer; that cold
+ * start can take most of a minute, and it lands on whoever scans first. A 20 s
+ * timeout would report "the server did not respond" for a server that is
+ * simply waking up, which is both wrong and unactionable.
+ */
+const REQUEST_TIMEOUT_MS = 90_000;
+
+/** Short, because nothing waits on it — see wake(). */
+const WAKE_TIMEOUT_MS = 5_000;
 
 export class RemoteProvider implements InferenceProvider {
   readonly name = 'remote' as const;
@@ -36,6 +47,29 @@ export class RemoteProvider implements InferenceProvider {
   async load(): Promise<void> {
     assertClassOrderVerified();
     this.ready = true;
+    this.wake();
+  }
+
+  /**
+   * Nudges a sleeping Space awake as soon as the app opens, so the container is
+   * usually up by the time the user has staged a leaf and pressed the shutter.
+   *
+   * Deliberately not awaited and deliberately silent: this is an optimisation,
+   * not a health check. A failure here says nothing useful — the network may
+   * arrive later, and the real request reports its own outcome with a typed
+   * error. Blocking or surfacing this would make app startup depend on a
+   * server the user has not asked anything of yet.
+   */
+  private wake(): void {
+    // try/catch as well as .catch: this must not be able to fail load(). An
+    // optimisation that can break the path it optimises is worse than no
+    // optimisation, and a synchronous throw here would reject load() and take
+    // diagnosis down with it.
+    try {
+      void this.client.get('/health', { timeout: WAKE_TIMEOUT_MS }).catch(() => undefined);
+    } catch {
+      // Ignored by design.
+    }
   }
 
   isReady(): boolean {

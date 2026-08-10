@@ -1,0 +1,25 @@
+# Hugging Face Space dependencies.
+#
+# Keep the top block in step with server/requirements.txt — the Space runs the
+# same app/ package. It is duplicated rather than generated so that what gets
+# deployed is reviewable in one file.
+fastapi==0.121.2
+uvicorn==0.34.3
+python-multipart==0.0.20
+pillow==11.3.0
+numpy==2.2.6
+pydantic==2.12.4
+
+# REQUIRED here, unlike locally. The model needs the Flex (Select TF ops)
+# delegate, which the TensorFlow pip package registers automatically and
+# tflite-runtime does not ship at all. Do NOT swap this for tflite-runtime:
+# that produces the exact kTfLiteUnresolvedOps failure this deployment exists
+# to work around.
+#
+# tensorflow-cpu is the same runtime without the CUDA payload, which keeps the
+# image small. If the Space's /health ever reports an unresolved-ops failure,
+# change this single line to `tensorflow==2.20.0` and rebuild.
+tensorflow-cpu==2.20.0
+
+# Used only at image build time by fetch_model.py.
+huggingface_hub==0.35.3

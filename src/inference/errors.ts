@@ -17,11 +17,15 @@ export type InferenceErrorCode =
 
 const DEFAULT_MESSAGES: Record<InferenceErrorCode, string> = {
   'no-network':
-    'No network connection. Remote diagnosis needs the internet — your history and library still work offline.',
+    'No internet connection. Diagnosis runs on a server, so it needs the internet — your history, the disease library and saved reports still work offline.',
   'server-unreachable':
-    'The diagnosis server did not respond. Check the server address and your connection, then retry.',
+    'Could not reach the diagnosis server. Check your internet connection and try again.',
   'server-error': 'The diagnosis server hit an internal error. Retry in a moment.',
-  timeout: 'The diagnosis took too long and was stopped. Retry on a faster connection.',
+  // The server sleeps when idle and has to start a container before it can
+  // answer, so a first slow request is expected rather than a fault. Telling
+  // the user to find a faster connection would send them after the wrong thing.
+  timeout:
+    'The diagnosis server did not answer in time. It may have been asleep after a period of inactivity — tap Try again, it usually answers on the second attempt.',
   'invalid-response':
     'The model returned data this app version does not understand. No diagnosis was made.',
   'image-unreadable': 'This image could not be read. Retake the photo and try again.',

@@ -1,12 +1,22 @@
-"""FastAPI debug/inspection server for the tomato leaf classifier.
+"""FastAPI inference server for the tomato leaf classifier.
 
-This is NOT the production inference path - the app runs the model on-device
-through react-native-fast-tflite and works offline. This server exists for
-debugging, for inspecting probability vectors, and for anyone who wants a
-server-side option.
+THIS IS THE SHIPPING INFERENCE PATH (owner decision, 2026-08-10).
 
-Run (inside server/.venv only):
+It was originally a debug fallback while the app ran the model on-device. That
+is no longer possible: the delivered .tflite carries 800+ TF Select ("Flex")
+operators (tools/inspect_tflite_ops.py), which react-native-fast-tflite cannot
+resolve, and the training code needed to re-export it is not available to this
+project. The full TensorFlow package DOES register the Flex delegate, so the
+same model file runs here unchanged.
+
+Consequence for the app: diagnosis now requires a network connection. The app
+states that plainly rather than failing mysteriously offline; history, the
+disease library and saved reports remain fully offline.
+
+Run locally (inside server/.venv only):
     uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+Deployed as a Hugging Face Docker Space - see deploy/huggingface/DEPLOY.md.
 """
 
 from __future__ import annotations
@@ -41,10 +51,11 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     lifespan=lifespan,
-    title="Tomato Leaf Doctor - debug inference server",
+    title="Tomato Leaf Doctor - inference server",
     description=(
-        "Optional debug path. The mobile app runs the model on-device. "
-        "This server never fabricates a prediction: with no model present, or while the "
+        "The inference path for the mobile app. The model cannot run on-device because it "
+        "was exported with TF Select (Flex) operators, so the app calls this server. "
+        "It never fabricates a prediction: with no model present, or while the "
         "class order is unverified, /predict returns a typed error."
     ),
     version="1.0.0",

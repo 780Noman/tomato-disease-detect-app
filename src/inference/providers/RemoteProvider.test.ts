@@ -7,6 +7,8 @@ import { RemoteProvider } from './RemoteProvider';
 jest.mock('../classGuard', () => ({ assertClassOrderVerified: jest.fn() }));
 
 const mockPost = jest.fn();
+// load() also fires a best-effort GET /health to wake a sleeping Space.
+const mockGet = jest.fn();
 jest.mock('axios', () => {
   const actual = jest.requireActual<typeof import('axios')>('axios');
   return {
@@ -14,7 +16,7 @@ jest.mock('axios', () => {
     ...actual,
     default: {
       ...actual.default,
-      create: () => ({ post: mockPost }) as unknown as AxiosInstance,
+      create: () => ({ post: mockPost, get: mockGet }) as unknown as AxiosInstance,
     },
   };
 });
@@ -42,6 +44,25 @@ function makeAxiosError(overrides: Partial<AxiosError>): AxiosError {
 describe('RemoteProvider (guard bypassed)', () => {
   beforeEach(() => {
     mockPost.mockReset();
+    mockGet.mockReset();
+    mockGet.mockResolvedValue({ data: { status: 'ok' } });
+  });
+
+  it('pings /health on load to wake a sleeping server, without awaiting it', async () => {
+    const provider = new RemoteProvider('http://server');
+    await provider.load();
+    expect(mockGet).toHaveBeenCalledWith('/health', expect.objectContaining({ timeout: 5_000 }));
+  });
+
+  it('loads successfully even when the wake ping fails outright', async () => {
+    // The wake call is an optimisation. If it could fail load(), it would take
+    // diagnosis down with it — worse than not having it.
+    mockGet.mockImplementation(() => {
+      throw new Error('no network');
+    });
+    const provider = new RemoteProvider('http://server');
+    await expect(provider.load()).resolves.toBeUndefined();
+    expect(provider.isReady()).toBe(true);
   });
 
   it('maps the response by class NAME and returns a full ranked vector', async () => {

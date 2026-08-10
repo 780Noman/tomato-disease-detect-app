@@ -71,6 +71,17 @@ If you have seen the sibling Apple Leaf Doctor project, note the difference clea
 > **This is not fixable in app code.** Do not attempt to work around it in the provider, and never add `SELECT_TF_OPS` to a conversion — that option is what caused it. The model must be re-exported with `TFLITE_BUILTINS` only; `tools/convert_tflite_builtins_only.py` does this and self-verifies with a stock interpreter. Run `npm run verify:model` before any build: it fails on a model carrying custom ops, so this class of defect can never reach an APK again.
 >
 > Until a builtins-only model exists, on-device diagnosis is **blocked**. The app reports it honestly via the `model-incompatible` error code and fabricates nothing. The `remote` provider and `server/` remain the working fallback.
+>
+> **Update 2026-08-10 — OWNER DECISION: ship server-backed.** The training code needed to re-export the model belongs to a collaborator and is not available to this project, so the on-device path cannot be unblocked here. The owner chose to deploy `server/` as a Hugging Face Docker Space instead: the full TensorFlow package registers the Flex delegate, so the same model file runs there unchanged. This is accepted as appropriate for a research-paper artefact rather than a production release.
+>
+> Consequences, which are now part of the contract:
+>
+> - `DEFAULT_INFERENCE_PROVIDER` is `remote`. `DEFAULT_REMOTE_API_URL` in `src/config/env.ts` is a **committed constant**, not an env var — `.easignore` keeps `.env` out of the EAS upload, so a release APK sees no environment variables at all. It is a public endpoint, not a secret.
+> - **Diagnosis now requires a network connection**, so §8's "degrade gracefully offline" rule is met by saying so plainly, not by pretending: a one-time first-launch notice, a permanent line on Home, and a live offline banner before the button that starts a request (`src/features/connectivity`). History, the disease library and PDF reports stay fully offline.
+> - The remote timeout is 90 s and `load()` pings `/health` to wake a sleeping Space. A free Space stops when idle; a first slow request is expected behaviour, not a fault, and the `timeout` message says so.
+> - Deployment is documented step-by-step in `deploy/huggingface/DEPLOY.md`. `server/app/` stays the single source of truth — `npm run space:prepare` assembles the Space folder so a hand-copied duplicate cannot drift from the tested code.
+>
+> **Before any APK build, run `npm run verify:release`.** It checks the deployed Space from the dev machine — URL set and https, `/health` reporting a genuinely loaded model, class order identical to `config/classes.ts`, and a real `/predict` round-trip returning six probabilities summing to ~1. This exists because every failure so far was discovered by building, installing and scanning, at roughly 40 minutes per attempt. Do not skip it.
 
 The model is **not finalised**. A technical review is in `docs/Tomato_Updated_Code_Review.md` — read it, it explains why. Summary of what is pending:
 

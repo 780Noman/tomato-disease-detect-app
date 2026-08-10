@@ -38,6 +38,12 @@ export interface ThemeColors {
   readonly danger: string;
   /** Text/icon colour placed on top of `danger`. */
   readonly onDanger: string;
+
+  /**
+   * Scrim behind a modal. Decorative only — never a text background, so it is
+   * exempt from the contrast pairs asserted in theme.contrast.test.ts.
+   */
+  readonly backdrop: string;
 }
 
 export interface Theme {
@@ -68,6 +74,10 @@ export const lightTheme: Theme = {
     warningText: palette.gold700,
     danger: palette.crimson600,
     onDanger: palette.white,
+
+    // Warm ink at 55%: dims the page without the blue cast a neutral black
+    // scrim gives the sand surfaces.
+    backdrop: 'rgba(42, 33, 28, 0.55)',
   },
 };
 
@@ -94,6 +104,10 @@ export const darkTheme: Theme = {
     warningText: palette.gold300,
     danger: palette.crimson300,
     onDanger: palette.coffee900,
+
+    // Heavier on dark: the raised card is already close to the page colour, so
+    // a light scrim would not separate them.
+    backdrop: 'rgba(0, 0, 0, 0.65)',
   },
 };
 

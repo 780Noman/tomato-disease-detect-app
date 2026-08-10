@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 import type { RootStackParamList } from '@/app/navigation/types';
 import { Button, PhotoFrame, Screen, Text } from '@/components';
+import { NetworkNotice } from '@/features/connectivity';
 import { spacing } from '@/theme';
 
 /**
@@ -32,6 +33,9 @@ export function ConfirmPhotoScreen() {
           One detached leaf, dark background, leaf filling the frame, no harsh shadows. If not,
           retake — the diagnosis is only meaningful for a photo staged like the guide.
         </Text>
+        {/* Placed immediately before the button that starts a network request,
+            so an offline user learns why it will fail before tapping it. */}
+        <NetworkNotice testID="confirm-network-notice" />
         <Button
           label="Analyse this leaf"
           onPress={() => navigation.navigate('Results', { imageUri })}

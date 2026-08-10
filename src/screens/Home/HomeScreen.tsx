@@ -2,13 +2,16 @@ import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, View } from 'react-native';
 
 import { Button, Card, Logo, Screen, Text } from '@/components';
+import { NetworkNotice, NetworkRequiredModal, useNetworkNotice } from '@/features/connectivity';
 import { spacing } from '@/theme';
 
 export function HomeScreen() {
   const navigation = useNavigation();
+  const notice = useNetworkNotice();
 
   return (
     <Screen testID="home-screen">
+      <NetworkRequiredModal visible={notice.visible === true} onDismiss={notice.dismiss} />
       <View style={styles.stack}>
         <View style={styles.hero}>
           <Logo size={88} />
@@ -19,10 +22,17 @@ export function HomeScreen() {
           </Text>
         </View>
 
+        <NetworkNotice />
+
         <Card style={styles.card}>
           <Text variant="heading">Scan a leaf</Text>
           <Text tone="muted">
             The capture guide shows how to stage the leaf so the diagnosis is meaningful.
+          </Text>
+          {/* Stated permanently, not only when offline: someone planning a trip
+              to a field needs to know before they get there. */}
+          <Text variant="caption" tone="muted" testID="home-network-requirement">
+            Scanning needs an internet connection. History, the library and reports work offline.
           </Text>
           <Button
             label="Start capture guide"
