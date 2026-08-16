@@ -15,6 +15,8 @@
     "test": "jest",
     "verify:model": "python tools/inspect_tflite_ops.py assets/model/Tomato_Model_Mobile.tflite",
     "verify:release": "node tools/verify-release.js",
+    "server:dev": "cd server && .venv/Scripts/python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000",
+    "test:images": "node tools/test-local-images.js",
     "space:prepare": "node tools/prepare-hf-space.js",
     "prepare": "husky"
   },

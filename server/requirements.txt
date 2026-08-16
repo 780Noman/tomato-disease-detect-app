@@ -13,9 +13,24 @@ pydantic==2.12.4
 pytest==8.4.2
 httpx==0.28.1
 
-# The model runtime is deliberately NOT pinned here.
-# This server runs in a degraded mode without it and never fabricates a
-# prediction. Install ONE of these in the venv when you actually want the
-# debug inference path, matching whichever artefact you have:
-#   pip install tensorflow==2.20.0     # loads .keras or .tflite
-#   pip install tflite-runtime         # lighter, .tflite only (Linux)
+# ---------------------------------------------------------------------------
+# Model runtime: ONNX. This is what actually works.
+#
+# The delivered .tflite carries 800+ TF Select ("Flex") operators
+# (tools/inspect_tflite_ops.py). No stock TFLite interpreter can resolve those:
+# not react-native-fast-tflite on a phone, and not even the full TensorFlow
+# wheel on Windows, which ships no Flex delegate library at all. Converting to
+# ONNX removes the problem — Flex ops ARE TensorFlow ops, so tf2onnx maps them
+# to standard ONNX operators. Result: ~100 ms per image on CPU, and no
+# TensorFlow at runtime.
+#
+# Do NOT add tflite-runtime as an alternative; it has no Flex delegate either.
+onnxruntime==1.28.0
+
+# Conversion only — NOT needed to serve. Install these when regenerating the
+# ONNX file with tools/convert_tflite_to_onnx.py, then they can be removed:
+#   pip install tensorflow==2.20.0 tf2onnx==1.17.0 onnx==1.22.0
+#
+# Without any model file the server starts in degraded mode, reports
+# model_loaded=false, and returns a typed 503 from /predict. It NEVER fabricates
+# a prediction.

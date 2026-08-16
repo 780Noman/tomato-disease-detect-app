@@ -24,6 +24,7 @@ from PIL import Image
 from .classes import IMG_SIZE, N_CLASSES, load_class_order
 
 MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+ONNX_NAME = "Tomato_Model.onnx"
 TFLITE_NAME = "Tomato_Model_Mobile.tflite"
 KERAS_NAME = "Tomato_Model_Deploy.keras"
 
@@ -80,9 +81,28 @@ class ModelService:
         return self.predictor is not None
 
     def load(self) -> None:
-        """Best-effort load. Failure leaves the server in degraded mode."""
+        """Best-effort load. Failure leaves the server in degraded mode.
+
+        ONNX is tried FIRST and is the artefact that actually works. The
+        delivered .tflite carries 800+ TF Select ("Flex") operators, which no
+        stock TFLite interpreter can resolve — not on a phone, and not even
+        under the full TensorFlow wheel on Windows, which ships no Flex delegate
+        library. Converting it to ONNX sidesteps the problem entirely: Flex ops
+        ARE TensorFlow ops, so tf2onnx maps them to standard ONNX operators.
+        See tools/convert_tflite_to_onnx.py.
+        """
+        onnx_path = self.models_dir / ONNX_NAME
         tflite_path = self.models_dir / TFLITE_NAME
         keras_path = self.models_dir / KERAS_NAME
+
+        if onnx_path.is_file():
+            try:
+                self.predictor = self._load_onnx(onnx_path)
+                self.model_version = ONNX_NAME
+                self.detail = "ONNX model loaded (onnxruntime, CPU)."
+                return
+            except Exception as exc:  # noqa: BLE001 - reported, not raised
+                self.detail = f"Found {ONNX_NAME} but could not load it: {exc}"
 
         if tflite_path.is_file():
             try:
@@ -109,6 +129,36 @@ class ModelService:
                 "and install tensorflow (or tflite-runtime) in server/.venv. "
                 "Until then /predict returns 503 - it never fabricates a prediction."
             )
+
+    def _load_onnx(self, path: Path) -> Predictor:
+        import onnxruntime as ort  # type: ignore[import-not-found]
+
+        session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+        model_input = session.get_inputs()[0]
+        model_output = session.get_outputs()[0]
+
+        # Dimensions converted from a dynamic-batch graph come back as symbolic
+        # strings, so only the concrete ones are checked. The spatial dims and
+        # channel count are what the app's preprocessing has to match.
+        spatial = [d for d in model_input.shape[1:] if isinstance(d, int)]
+        if spatial != [IMG_SIZE, IMG_SIZE, 3]:
+            raise ValueError(
+                f"Model input shape {model_input.shape} does not end in "
+                f"[{IMG_SIZE}, {IMG_SIZE}, 3]."
+            )
+        classes = model_output.shape[-1]
+        if isinstance(classes, int) and classes != N_CLASSES:
+            raise ValueError(f"Model output has {classes} classes, expected {N_CLASSES}.")
+
+        # The graph is float16 internally but declares a float32 boundary; honour
+        # whatever it actually asks for rather than assuming.
+        dtype = np.float16 if "float16" in model_input.type else np.float32
+
+        def predict(batch: np.ndarray) -> np.ndarray:
+            outputs = session.run([model_output.name], {model_input.name: batch.astype(dtype)})
+            return np.asarray(outputs[0][0], dtype=np.float32)
+
+        return predict
 
     def _load_tflite(self, path: Path) -> Predictor:
         # ORDER MATTERS. Full TensorFlow is tried FIRST because this model
