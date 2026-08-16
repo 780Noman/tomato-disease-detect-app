@@ -29,10 +29,13 @@ Balance DataSet Without Healthy Class.zip
 *.h5
 docs/model/
 
-# Model: exclude the extension everywhere, then re-include exactly the one
-# asset the app requires at build time.
+# Model: never uploaded. The delivered .tflite cannot run on-device (800+ TF
+# Select/Flex operators — see CLAUDE.md §4), so bundling it added ~141 MB to
+# every APK, and ~8 minutes of upload per build, for a path that always fails.
+# src/inference/modelConfig.ts has no asset require, so nothing needs it.
+# When a builtins-only model exists, re-include it here and follow the steps in
+# modelConfig.ts.
 *.tflite
-!assets/model/Tomato_Model_Mobile.tflite
 
 # Expo / native / OS noise
 expo-env.d.ts

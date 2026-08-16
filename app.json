@@ -53,7 +53,15 @@
       "react-native-fast-tflite",
       "expo-sqlite",
       "expo-asset",
-      "./plugins/withAndroidLargeHeap"
+      "./plugins/withAndroidLargeHeap",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

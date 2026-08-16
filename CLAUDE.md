@@ -81,6 +81,10 @@ If you have seen the sibling Apple Leaf Doctor project, note the difference clea
 > - The remote timeout is 90 s and `load()` pings `/health` to wake a sleeping Space. A free Space stops when idle; a first slow request is expected behaviour, not a fault, and the `timeout` message says so.
 > - Deployment is documented step-by-step in `deploy/huggingface/DEPLOY.md`. `server/app/` stays the single source of truth — `npm run space:prepare` assembles the Space folder so a hand-copied duplicate cannot drift from the tested code.
 >
+> **Update 2026-08-16 — the model is no longer bundled, and there is a `localtest` build profile.** `MODEL_SOURCE` in `src/inference/modelConfig.ts` is `undefined` and `.easignore` excludes `*.tflite` outright: bundling a model that cannot execute cost ~141 MB of APK and ~8 minutes of upload per build for a path that always fails. `modelConfig.ts` lists the three steps to restore on-device when a builtins-only model exists.
+>
+> `eas.json` gains a `localtest` profile (extends `preview`) whose `env` points the app at a server on the dev machine's LAN, for producing screenshots with real predictions. It requires `usesCleartextTraffic: true` (via `expo-build-properties`), because Android release builds block plain HTTP — verified present in the generated manifest. **That relaxation is currently global, so remove it before any public release**, or move it behind an `app.config.js` condition. `verify:release` still demands https and is the gate for a shipping build; `localtest` deliberately bypasses it.
+>
 > **Before any APK build, run `npm run verify:release`.** It checks the deployed Space from the dev machine — URL set and https, `/health` reporting a genuinely loaded model, class order identical to `config/classes.ts`, and a real `/predict` round-trip returning six probabilities summing to ~1. This exists because every failure so far was discovered by building, installing and scanning, at roughly 40 minutes per attempt. Do not skip it.
 
 The model is **not finalised**. A technical review is in `docs/Tomato_Updated_Code_Review.md` — read it, it explains why. Summary of what is pending:
