@@ -11,11 +11,21 @@
  */
 const { spawn } = require('child_process');
 const fs = require('fs');
+const net = require('net');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const SERVER_DIR = path.join(ROOT, 'server');
-const PORT = process.env.PORT ?? '8000';
+
+/**
+ * 8010, not 8000. Port 8000 is Django's default `runserver` port and is very
+ * often already taken on a development machine — it was here, by an unrelated
+ * Python process, and uvicorn's failure ("only one usage of each socket address
+ * is normally permitted") does not say which program is holding it. Override
+ * with PORT if 8010 is busy too, and keep .env's EXPO_PUBLIC_REMOTE_API_URL in
+ * step.
+ */
+const PORT = process.env.PORT ?? '8010';
 
 const candidates = [
   path.join(SERVER_DIR, '.venv', 'Scripts', 'python.exe'), // Windows
@@ -33,16 +43,48 @@ if (python === undefined) {
   process.exit(1);
 }
 
-console.log(`python : ${python}`);
-console.log(`serving: http://0.0.0.0:${PORT}  (phone uses this machine's LAN IP)`);
-console.log('health : /health   predict: POST /predict (multipart field "image")\n');
+/**
+ * Checks the port before handing it to uvicorn. uvicorn's own failure —
+ * "only one usage of each socket address is normally permitted" — does not say
+ * which program holds the port or what to do, and the answer is usually "not
+ * this project", so killing something is the wrong reflex.
+ */
+function portIsFree(port) {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.once('error', () => resolve(false));
+    probe.once('listening', () => probe.close(() => resolve(true)));
+    probe.listen(Number(port), '0.0.0.0');
+  });
+}
 
-const child = spawn(
-  python,
-  ['-m', 'uvicorn', 'app.main:app', '--host', '0.0.0.0', '--port', PORT],
-  { cwd: SERVER_DIR, stdio: 'inherit' },
-);
+async function main() {
+  if (!(await portIsFree(PORT))) {
+    console.error(`Port ${PORT} is already in use, so the server cannot start.`);
+    console.error('\nSomething else on this machine is listening there. Find out what');
+    console.error('before killing anything — on Windows:');
+    console.error(
+      `  Get-Process -Id (Get-NetTCPConnection -LocalPort ${PORT} -State Listen).OwningProcess`,
+    );
+    console.error('\nOr just use a different port, and update .env to match:');
+    console.error(`  $env:PORT=${Number(PORT) + 1}; npm run server:dev`);
+    console.error(`  EXPO_PUBLIC_REMOTE_API_URL=http://<this-machine-ip>:${Number(PORT) + 1}`);
+    process.exit(1);
+  }
 
-child.on('exit', (code, signal) => {
-  process.exit(signal !== null ? 1 : (code ?? 0));
-});
+  console.log(`python : ${python}`);
+  console.log(`serving: http://0.0.0.0:${PORT}  (phone uses this machine's LAN IP)`);
+  console.log('health : /health   predict: POST /predict (multipart field "image")\n');
+
+  const child = spawn(
+    python,
+    ['-m', 'uvicorn', 'app.main:app', '--host', '0.0.0.0', '--port', PORT],
+    { cwd: SERVER_DIR, stdio: 'inherit' },
+  );
+
+  child.on('exit', (code, signal) => {
+    process.exit(signal !== null ? 1 : (code ?? 0));
+  });
+}
+
+void main();

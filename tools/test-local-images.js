@@ -3,7 +3,7 @@
  *
  *   npm run test:images                        # 3 images per class, local server
  *   npm run test:images -- --per-class 10
- *   npm run test:images -- --url http://192.168.0.105:8000
+ *   npm run test:images -- --url http://192.168.0.105:8010
  *   npm run test:images -- --dir "C:/some/folder"   # a flat folder, no labels
  *
  * WHAT THIS IS FOR: checking the whole pipeline end to end — image in, six
@@ -28,7 +28,7 @@ const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.bmp', '.webp']);
 const REQUEST_TIMEOUT_MS = 180_000; // first request loads the model
 
 function parseArgs(argv) {
-  const options = { url: 'http://127.0.0.1:8000', perClass: 3, dir: null };
+  const options = { url: 'http://127.0.0.1:8010', perClass: 3, dir: null };
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i];
     const value = argv[i + 1];
